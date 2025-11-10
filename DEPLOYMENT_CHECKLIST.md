@@ -40,9 +40,14 @@ git push -u origin main
 ```
 
 ### 체크
-- [ ] GitHub 저장소 생성 완료
-- [ ] 코드 푸시 완료
-- [ ] .gitignore 적용 확인 (node_modules, .env 제외됨)
+- [x] GitHub 저장소 생성 완료 ✅
+- [x] 코드 푸시 완료 ✅ (280 objects, 550KB)
+- [x] .gitignore 적용 확인 (node_modules, .env 제외됨) ✅
+
+### 저장소 URL
+```
+https://github.com/papas-yohan/moodon
+```
 
 ---
 
