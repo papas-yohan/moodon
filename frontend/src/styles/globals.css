@@ -1,0 +1,339 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Pretendard', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 h-10 py-2 px-4;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-secondary-600 text-white hover:bg-secondary-700 h-10 py-2 px-4;
+  }
+  
+  .btn-outline {
+    @apply btn border border-gray-300 bg-white hover:bg-gray-50 h-10 py-2 px-4;
+  }
+  
+  .btn-danger {
+    @apply btn bg-danger-600 text-white hover:bg-danger-700 h-10 py-2 px-4;
+  }
+  
+  .input {
+    @apply flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .card {
+    @apply rounded-lg border border-gray-200 bg-white text-gray-950 shadow-sm;
+  }
+  
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+  
+  .card-content {
+    @apply p-6 pt-0;
+  }
+  
+  .table {
+    @apply w-full caption-bottom text-sm;
+  }
+  
+  .table-header {
+    @apply border-b;
+  }
+  
+  .table-row {
+    @apply border-b transition-colors hover:bg-gray-50/50 data-[state=selected]:bg-gray-50;
+  }
+  
+  .table-head {
+    @apply h-12 px-4 text-left align-middle font-medium text-gray-500;
+  }
+  
+  .table-cell {
+    @apply p-4 align-middle;
+  }
+}
+
+/* AG Grid 커스텀 스타일 */
+.ag-theme-alpine {
+  --ag-font-family: 'Pretendard', system-ui, sans-serif;
+  --ag-font-size: 14px;
+  --ag-header-height: 48px;
+  --ag-row-height: 48px;
+  --ag-border-color: #e5e7eb;
+  --ag-header-background-color: #f9fafb;
+  --ag-odd-row-background-color: #ffffff;
+  --ag-even-row-background-color: #f9fafb;
+  --ag-selected-row-background-color: #dbeafe;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 로딩 애니메이션 */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* 페이드 인 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ==
+======================================
+   모바일 최적화 스타일
+   ======================================== */
+
+/* 안전 영역 (노치 대응) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+/* 터치 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  /* 터치 디바이스에서 버튼 크기 증가 */
+  .btn {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* 터치 피드백 */
+  .btn:active,
+  .table-row:active,
+  [role="button"]:active {
+    @apply opacity-70;
+  }
+  
+  /* 호버 효과 제거 */
+  .btn:hover,
+  .table-row:hover {
+    @apply opacity-100;
+  }
+}
+
+/* 모바일 뷰포트 높이 (주소창 고려) */
+.min-h-screen-mobile {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* 모바일 네비게이션 */
+@media (max-width: 640px) {
+  .mobile-nav-item {
+    @apply flex items-center space-x-3 px-4 py-3 text-base font-medium transition-colors;
+  }
+  
+  .mobile-nav-item.active {
+    @apply bg-blue-50 text-blue-700 border-l-4 border-blue-500;
+  }
+}
+
+/* 스와이프 인디케이터 */
+.swipe-indicator {
+  @apply absolute top-0 left-0 right-0 h-1 bg-blue-500 transition-all duration-300;
+}
+
+/* 풀 투 리프레시 */
+.pull-to-refresh {
+  @apply absolute top-0 left-0 right-0 flex items-center justify-center py-4 bg-white shadow-sm;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-out;
+}
+
+.pull-to-refresh.pulling {
+  transform: translateY(0);
+}
+
+/* 모바일 카드 */
+@media (max-width: 640px) {
+  .mobile-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4;
+  }
+  
+  .mobile-card-header {
+    @apply flex items-center justify-between mb-3 pb-3 border-b border-gray-100;
+  }
+  
+  .mobile-card-content {
+    @apply space-y-2;
+  }
+  
+  .mobile-card-row {
+    @apply flex justify-between items-center py-2;
+  }
+  
+  .mobile-card-label {
+    @apply text-xs font-medium text-gray-500;
+  }
+  
+  .mobile-card-value {
+    @apply text-sm text-gray-900 font-medium;
+  }
+}
+
+/* 모바일 모달 */
+@media (max-width: 640px) {
+  .mobile-modal {
+    @apply fixed inset-0 z-50 bg-white;
+  }
+  
+  .mobile-modal-header {
+    @apply sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between;
+  }
+  
+  .mobile-modal-content {
+    @apply p-4 overflow-y-auto;
+    max-height: calc(100vh - 60px);
+  }
+}
+
+/* 터치 스크롤 최적화 */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* 모바일 입력 필드 */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    @apply text-base; /* iOS 자동 줌 방지 */
+  }
+}
+
+/* 햅틱 피드백 애니메이션 */
+@keyframes haptic {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+}
+
+.haptic-feedback {
+  animation: haptic 0.1s ease-in-out;
+}
+
+/* 로딩 스켈레톤 */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  @apply bg-gray-200 rounded;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* 오프라인 인디케이터 */
+.offline-indicator {
+  @apply fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-4 py-2 rounded-full shadow-lg z-50;
+}
+
+/* 네트워크 상태 배지 */
+.network-badge {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.network-badge.online {
+  @apply bg-green-100 text-green-800;
+}
+
+.network-badge.offline {
+  @apply bg-red-100 text-red-800;
+}
+
+.network-badge.slow {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+/* 배터리 절약 모드 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 다크 모드 지원 준비 */
+@media (prefers-color-scheme: dark) {
+  /* 다크 모드 스타일은 추후 추가 */
+}
+
+/* 가로 모드 최적화 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-modal-content {
+    max-height: calc(100vh - 50px);
+  }
+  
+  .mobile-nav-item {
+    @apply py-2;
+  }
+}

@@ -1,0 +1,187 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 상품
+model Product {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  price             Int
+  category          String?
+  size              String?
+  color             String?
+  marketLink        String?
+  marketUrl         String?
+  composedImageUrl  String?
+  sendCount         Int      @default(0)
+  readCount         Int      @default(0)
+  clickCount        Int      @default(0)
+  status            String @default("DRAFT")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  images            ProductImage[]
+  composeJobs       ComposeJob[]
+  sendLogs          SendLog[]
+  trackingEvents    TrackingEvent[]
+
+  @@map("mo_products")
+  @@index([name])
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// 상품 원본 이미지
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  imageUrl  String
+  sequence  Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("mo_product_images")
+  @@index([productId])
+  @@index([sequence])
+}
+
+// 주소록
+model Contact {
+  id        String   @id @default(cuid())
+  name      String?
+  phone     String   @unique
+  kakaoId   String?
+  groupName String?
+  tags      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sendLogs       SendLog[]
+  trackingEvents TrackingEvent[]
+
+  @@map("mo_contacts")
+  @@index([phone])
+  @@index([groupName])
+}
+
+// 발송 작업
+model SendJob {
+  id             String   @id @default(cuid())
+  productIds     String
+  channel        String
+  recipientCount Int      @default(0)
+  successCount   Int      @default(0)
+  failCount      Int      @default(0)
+  status         String @default("PENDING")
+  scheduledAt    DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+
+  // Relations
+  sendLogs SendLog[]
+
+  @@map("mo_send_jobs")
+}
+
+// 발송 로그
+model SendLog {
+  id                String   @id @default(cuid())
+  sendJobId         String
+  productId         String
+  contactId         String
+  channel           String
+  status            String
+  errorCode         String?
+  errorMessage      String?
+  externalMessageId String?
+  sentAt            DateTime?
+  createdAt         DateTime @default(now())
+
+  // Relations
+  sendJob        SendJob @relation(fields: [sendJobId], references: [id], onDelete: Cascade)
+  product        Product @relation(fields: [productId], references: [id])
+  contact        Contact @relation(fields: [contactId], references: [id])
+  trackingEvents TrackingEvent[]
+
+  @@map("mo_send_logs")
+  @@index([sendJobId])
+  @@index([contactId])
+}
+
+// 추적 이벤트
+model TrackingEvent {
+  id           String    @id @default(cuid())
+  productId    String
+  contactId    String?
+  sendLogId    String?
+  eventType    String
+  trackingCode String?   @unique
+  ipAddress    String?
+  userAgent    String?
+  metadata     String?
+  createdAt    DateTime  @default(now())
+
+  // Relations
+  product Product  @relation(fields: [productId], references: [id])
+  contact Contact? @relation(fields: [contactId], references: [id])
+  sendLog SendLog? @relation(fields: [sendLogId], references: [id])
+
+  @@map("mo_tracking_events")
+  @@index([productId])
+  @@index([trackingCode])
+}
+
+// 이미지 합성 작업
+model ComposeJob {
+  id           String    @id @default(cuid())
+  productId    String
+  status       String @default("PENDING")
+  templateType String    @default("grid")
+  resultUrl    String?
+  errorMessage String?
+  retryCount   Int       @default(0)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("mo_compose_jobs")
+}
+
+// 설정 (API 키, 시스템 설정 등)
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("mo_settings")
+  @@index([key])
+}
+
+// SQLite에서는 enum 대신 String 사용
+// ProductStatus: "DRAFT" | "COMPOSING" | "READY" | "ARCHIVED"
+// MessageChannel: "SMS" | "KAKAO" | "BOTH"
+// MessageStatus: "PENDING" | "SUCCESS" | "FAILED"
+// JobStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
+// EventType: "CLICK" | "READ" | "DELIVERED"
+
