@@ -60,9 +60,33 @@ async function bootstrap() {
   // Enable trust proxy for proper IP handling
   app.set('trust proxy', 1);
 
-  // CORS 설정
+  // CORS 설정 - Vercel 도메인 패턴 자동 허용
   const corsOrigin = process.env.NODE_ENV === 'production' 
-    ? process.env.CORS_ORIGIN?.split(',') || ['https://yourdomain.com']
+    ? (origin: string, callback: (err: Error | null, allow?: boolean) => void) => {
+        // 환경 변수에 설정된 도메인 확인
+        const allowedOrigins = process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || [];
+        
+        // origin이 없으면 (서버 간 요청) 허용
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        
+        // 명시적으로 허용된 도메인
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        
+        // Vercel 도메인 패턴 허용 (*.vercel.app)
+        if (origin.endsWith('.vercel.app')) {
+          callback(null, true);
+          return;
+        }
+        
+        // 그 외는 거부
+        callback(new Error('Not allowed by CORS'));
+      }
     : ['http://localhost:5173', 'http://localhost:3000'];
 
   app.enableCors({
