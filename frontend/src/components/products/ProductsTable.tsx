@@ -201,7 +201,8 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
       }
       
       // 상대 경로를 절대 경로로 변환
-      const baseUrl = 'http://localhost:3000';
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const baseUrl = API_BASE_URL.replace('/api/v1', '');
       const cleanUrl = url.startsWith('/') ? url : `/${url}`;
       return `${baseUrl}${cleanUrl}`;
     };

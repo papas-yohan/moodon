@@ -28,7 +28,8 @@ export const SolapiSettings: React.FC = () => {
   const loadApiKeys = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/v1/settings/api-keys');
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${API_BASE_URL}/settings/api-keys`);
       const data = await response.json();
       setApiKeys(data);
       
@@ -55,7 +56,8 @@ export const SolapiSettings: React.FC = () => {
 
     try {
       setSaving(true);
-      const response = await fetch(`http://localhost:3000/api/v1/settings/api-keys/${type}`, {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${API_BASE_URL}/settings/api-keys/${type}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +92,8 @@ export const SolapiSettings: React.FC = () => {
   const handleReload = async () => {
     try {
       setSaving(true);
-      const response = await fetch('http://localhost:3000/api/v1/settings/reload-api-keys', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${API_BASE_URL}/settings/reload-api-keys`, {
         method: 'POST',
       });
 

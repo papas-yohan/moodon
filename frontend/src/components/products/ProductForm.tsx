@@ -75,8 +75,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       
       // 기존 이미지 미리보기 설정
       if (product.images && product.images.length > 0) {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+        const baseUrl = API_BASE_URL.replace('/api/v1', '');
         const existingImageUrls = product.images.map(img => 
-          img.imageUrl.replace('http://localhost:3000', '')
+          img.imageUrl.replace(baseUrl, '')
         );
         console.log('이미지 URL 설정 전:', imagePreviewUrls);
         setImagePreviewUrls(existingImageUrls);

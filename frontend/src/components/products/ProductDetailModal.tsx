@@ -72,9 +72,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     {product.images.map((image, index) => {
                       // URL 정규화
+                      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+                      const baseUrl = API_BASE_URL.replace('/api/v1', '');
                       const normalizedUrl = image.imageUrl.startsWith('http') 
                         ? image.imageUrl 
-                        : `http://localhost:3000${image.imageUrl.startsWith('/') ? '' : '/'}${image.imageUrl}`;
+                        : `${baseUrl}${image.imageUrl.startsWith('/') ? '' : '/'}${image.imageUrl}`;
                       return (
                         <div key={index} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                           <img
@@ -254,9 +256,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <div className="max-w-2xl mx-auto">
                   <div className="bg-gray-100 rounded-lg overflow-hidden">
                     <img
-                      src={product.composedImageUrl.startsWith('http') 
-                        ? product.composedImageUrl 
-                        : `http://localhost:3000${product.composedImageUrl.startsWith('/') ? '' : '/'}${product.composedImageUrl}`}
+                      src={(() => {
+                        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+                        const baseUrl = API_BASE_URL.replace('/api/v1', '');
+                        return product.composedImageUrl.startsWith('http') 
+                          ? product.composedImageUrl 
+                          : `${baseUrl}${product.composedImageUrl.startsWith('/') ? '' : '/'}${product.composedImageUrl}`;
+                      })()}
                       alt={`${product.name} 합성 이미지`}
                       className="w-full h-auto object-contain"
                       onError={(e) => {
