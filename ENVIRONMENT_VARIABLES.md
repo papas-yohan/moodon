@@ -16,16 +16,16 @@ CLOUDINARY_API_SECRET=QS25mKuuOqzZODDZPNvIji308aA
 
 ---
 
-### Supabase (기존 프로젝트)
+### Supabase (✅ 완료 - 신규 프로젝트 "personal")
 ```bash
-DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.jtdrqyyzeaamogbxtelj:Yohan0817**@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
 ```
 
-**DATABASE_URL 확인 방법:**
-1. https://supabase.com 로그인
-2. 프로젝트 선택
-3. Project Settings → Database
-4. Connection string → URI 복사
+**프로젝트 정보:**
+- Project Name: personal
+- Project URL: https://jtdrqyyzeaamogbxtelj.supabase.co
+- Region: Southeast Asia (Singapore)
+- 테이블 8개 생성 완료 (mo_ 프리픽스)
 
 ---
 
@@ -48,9 +48,9 @@ NODE_ENV=production
 
 ## 🚀 Vercel 배포 시 환경 변수 설정
 
-### 백엔드 환경 변수 (8개)
+### 백엔드 환경 변수 (8개) - Vercel 배포용
 ```bash
-DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.jtdrqyyzeaamogbxtelj:Yohan0817**@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
 SOLAPI_API_KEY=NCSM4OQZXGZLFBWW
 SOLAPI_API_SECRET=HIUEVKUJFFJTODQ1QB1J57ARFO1N9JPM
 SOLAPI_SENDER=01042151128
@@ -58,6 +58,7 @@ CLOUDINARY_CLOUD_NAME=djxrffrjfg
 CLOUDINARY_API_KEY=222333877835831
 CLOUDINARY_API_SECRET=QS25mKuuOqzZODDZPNvIji308aA
 ENCRYPTION_KEY=3ygDe7hSi2KX3VZAnyVR7aitfpHc8pSR
+NODE_ENV=production
 ```
 
 ### 프론트엔드 환경 변수 (1개)
@@ -104,12 +105,16 @@ vercel --prod
 ### 정보 수집
 - [x] Cloudinary Cloud Name: djxrffrjfg
 - [x] Cloudinary API Key: 222333877835831
-- [ ] Cloudinary API Secret (복사 필요)
-- [ ] Supabase DATABASE_URL
+- [x] Cloudinary API Secret: QS25mKuuOqzZODDZPNvIji308aA
+- [x] Supabase DATABASE_URL (신규 프로젝트 "personal")
+- [x] Supabase 마이그레이션 완료 (8개 테이블)
 - [x] Solapi 키 (이미 있음)
 - [x] ENCRYPTION_KEY: 3ygDe7hSi2KX3VZAnyVR7aitfpHc8pSR
 
 ### 배포 준비
+- [x] Supabase 프로젝트 생성 완료
+- [x] 데이터베이스 마이그레이션 완료
+- [ ] Supabase RLS 비활성화 (SQL 실행 필요)
 - [ ] Vercel CLI 설치
 - [ ] 백엔드 배포
 - [ ] 프론트엔드 배포

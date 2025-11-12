@@ -158,11 +158,14 @@ vercel --prod
 
 ---
 
-**현재 진행률**: 30% (GitHub 푸시 완료)  
-**예상 남은 시간**: 1-1.5시간  
-**다음 단계**: Cloudinary 계정 생성 및 Vercel 배포
+**현재 진행률**: 95% (배포 완료, Protection 설정 필요)  
+**예상 남은 시간**: 5분 (Deployment Protection 해제)  
+**다음 단계**: Vercel Deployment Protection 해제 및 기능 테스트
 
 ---
 
-**업데이트**: 2025-11-08 22:45  
-**상태**: ✅ GitHub 푸시 완료 (https://github.com/papas-yohan/moodon)
+**업데이트**: 2025-11-10 15:40  
+**상태**: ✅ 배포 완료!
+- ✅ 백엔드: https://backend-eisqydaeg-yohans-projects-de3234df.vercel.app
+- ✅ 프론트엔드: https://frontend-cn6vtmrvd-yohans-projects-de3234df.vercel.app
+- ⚠️ Deployment Protection 해제 필요
