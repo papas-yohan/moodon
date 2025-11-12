@@ -1,315 +1,385 @@
-# 🚀 다음 개발 진행 계획 (스프린트 8)
+# 📋 Moodon 다음 개발 계획
 
-## 📅 개발 일정
-
-**기간**: 2025-11-06 ~ 2025-11-10 (5일)  
-**목표**: 시스템 완성도 향상 및 사용자 경험 개선  
-**현재 진행률**: 87.5% → 100% 목표
+**작성일**: 2025-11-12  
+**현재 버전**: 1.0.0  
+**목표 버전**: 1.1.0 → 2.0.0
 
 ---
 
-## 🎯 스프린트 8 상세 계획
+## 🎯 Phase 3: 안정화 및 최적화 (1-2주)
 
-### Day 1 (2025-11-06): 발송 모니터링 시스템
-**목표**: 실시간 발송 상태 모니터링 구현
+### 우선순위 1: 즉시 수정 필요
 
-#### Backend 작업 (4시간)
-- [ ] **SendJobMonitor API 구현**
-  ```typescript
-  GET /send-jobs/:id/monitor     // 실시간 발송 진행률
-  GET /send-jobs/:id/logs/live   // 실시간 로그 스트림
-  POST /send-jobs/:id/pause      // 발송 일시정지
-  POST /send-jobs/:id/resume     // 발송 재개
-  ```
-
-- [ ] **WebSocket 연동**
-  - 실시간 진행률 업데이트
-  - 발송 상태 변경 알림
-  - 에러 발생 즉시 알림
-
-#### Frontend 작업 (4시간)
-- [ ] **SendJobMonitor 페이지 구현**
-  - 실시간 프로그레스 바
-  - 발송 로그 실시간 표시
-  - 일시정지/재개 버튼
-  - 실패 건 필터링 및 재발송
-
-### Day 2 (2025-11-07): 상세 분석 시스템
-**목표**: 고급 분석 리포트 및 차트 구현
-
-#### Backend 작업 (4시간)
-- [ ] **Advanced Analytics API**
-  ```typescript
-  GET /analytics/roi/:productId        // ROI 계산
-  GET /analytics/segments              // 고객 세그먼트 분석
-  GET /analytics/time-series/:range    // 시계열 분석
-  GET /analytics/comparison            // 상품간 성과 비교
-  ```
-
-- [ ] **데이터 집계 최적화**
-  - 인덱스 추가
-  - 집계 쿼리 최적화
-  - 캐싱 전략 구현
-
-#### Frontend 작업 (4시간)
-- [ ] **Analytics 페이지 구현**
-  - 고급 차트 (히트맵, 트리맵, 산점도)
-  - 기간별 성과 비교
-  - 고객 세그먼트 분석
-  - 데이터 내보내기 (PDF, Excel)
-
-### Day 3 (2025-11-08): 설정 관리 시스템
-**목표**: 시스템 설정 및 관리 기능 구현
-
-#### Backend 작업 (4시간)
-- [ ] **Settings API 구현**
-  ```typescript
-  GET /settings/api-keys           // API 키 목록
-  POST /settings/api-keys          // API 키 생성
-  PUT /settings/api-keys/:id       // API 키 수정
-  DELETE /settings/api-keys/:id    // API 키 삭제
-  GET /settings/templates          // 메시지 템플릿 관리
-  POST /settings/notifications     // 알림 설정
-  ```
-
-#### Frontend 작업 (4시간)
-- [ ] **Settings 페이지 구현**
-  - API 키 관리 인터페이스
-  - 메시지 템플릿 에디터
-  - 알림 설정 (이메일, 웹훅)
-  - 사용자 프로필 관리
-
-### Day 4 (2025-11-09): 모바일 최적화
-**목표**: 모바일 사용성 개선 및 PWA 구현
-
-#### Frontend 작업 (8시간)
-- [ ] **반응형 디자인 개선**
-  - 모바일 네비게이션 개선
-  - 터치 친화적 인터페이스
-  - 스와이프 제스처 추가
-  - 모바일 테이블 최적화
-
-- [ ] **PWA 기능 구현**
-  - Service Worker 설정
-  - 오프라인 지원
-  - 푸시 알림
-  - 앱 설치 프롬프트
-
-### Day 5 (2025-11-10): 성능 최적화 및 마무리
-**목표**: 성능 최적화 및 최종 테스트
-
-#### 성능 최적화 (4시간)
-- [ ] **코드 스플리팅**
-  - 페이지별 청크 분리
-  - 동적 import 적용
-  - 번들 크기 최적화
-
-- [ ] **이미지 최적화**
-  - WebP 포맷 지원
-  - 이미지 압축 개선
-  - 레이지 로딩 구현
-
-#### 최종 테스트 (4시간)
-- [ ] **E2E 테스트 작성**
-  - 전체 플로우 테스트
-  - 크로스 브라우저 테스트
-  - 모바일 테스트
-
-- [ ] **성능 테스트**
-  - Lighthouse 점수 90+ 달성
-  - 로딩 시간 최적화
-  - 메모리 사용량 최적화
-
----
-
-## 📊 예상 성과
-
-### 기능 완성도
-- **발송 모니터링**: 실시간 진행률 및 로그 확인
-- **상세 분석**: ROI, 세그먼트, 시계열 분석
-- **설정 관리**: API 키, 템플릿, 알림 설정
-- **모바일 지원**: PWA 및 터치 최적화
-- **성능**: Lighthouse 90+ 점수
-
-### 사용자 경험 개선
-- **실시간 피드백**: 발송 상태 즉시 확인
-- **데이터 인사이트**: 고급 분석 리포트
-- **편의성**: 모바일에서도 완전한 기능 사용
-- **안정성**: 오프라인 지원 및 에러 복구
-
----
-
-## 🛠 기술적 구현 세부사항
-
-### 1. 실시간 모니터링
+#### 1. 테스트 페이지 상품 목록 오류 수정
+**문제**: "Unexpected token '<', "<!doctype "... is not valid JSON"  
+**원인**: 특정 조건에서 HTML 응답 반환  
+**해결책**:
 ```typescript
-// WebSocket 연결
-const socket = io('/send-jobs');
-socket.on('progress', (data) => {
-  updateProgress(data.jobId, data.progress);
-});
-
-// 실시간 로그 스트림
-const logStream = new EventSource(`/api/v1/send-jobs/${jobId}/logs/stream`);
-logStream.onmessage = (event) => {
-  appendLog(JSON.parse(event.data));
-};
-```
-
-### 2. 고급 차트
-```typescript
-// 히트맵 차트 (시간대별 성과)
-<ResponsiveContainer width="100%" height={400}>
-  <HeatMap
-    data={hourlyData}
-    xAxisDataKey="hour"
-    yAxisDataKey="day"
-    valueDataKey="clicks"
-  />
-</ResponsiveContainer>
-
-// ROI 트렌드 차트
-<LineChart data={roiData}>
-  <Line dataKey="roi" stroke="#8884d8" />
-  <Line dataKey="cost" stroke="#82ca9d" />
-</LineChart>
-```
-
-### 3. PWA 설정
-```javascript
-// service-worker.js
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open('moodon-v1').then((cache) => {
-      return cache.addAll([
-        '/',
-        '/dashboard',
-        '/products',
-        '/contacts',
-        '/send'
-      ]);
-    })
-  );
+// frontend/src/pages/TestPage.tsx
+// useProducts 훅 사용 방식 수정
+const { data: productsData, isLoading, error } = useProducts({
+  page: 1,
+  limit: 20
 });
 ```
 
-### 4. 코드 스플리팅
-```typescript
-// 동적 import
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Products = lazy(() => import('./pages/Products'));
-const Analytics = lazy(() => import('./pages/Analytics'));
+#### 2. Vercel 고정 도메인 설정
+**문제**: 매번 새로운 URL 생성  
+**해결책**:
+1. Vercel Dashboard → frontend 프로젝트
+2. Settings → Domains
+3. Production Domain 확인 및 고정
+4. Railway CORS_ORIGIN을 고정 도메인으로 변경
 
-// 라우트 설정
-<Route path="/dashboard" element={
-  <Suspense fallback={<Loading />}>
-    <Dashboard />
-  </Suspense>
-} />
+**예상 고정 도메인**:
+```
+https://frontend-yohans-projects-de3234df.vercel.app
+```
+
+#### 3. Railway 콜드 스타트 개선
+**문제**: 첫 요청 시 12초 이상 소요  
+**해결책**:
+- Railway 유료 플랜 고려 (Always On)
+- 또는 Health Check 크론잡 설정 (5분마다 핑)
+- 또는 Uptime Robot 무료 모니터링 사용
+
+```yaml
+# .github/workflows/keep-alive.yml
+name: Keep Railway Alive
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # 5분마다
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Railway
+        run: curl https://backend-production-c41fe.up.railway.app/api/v1/health
+```
+
+### 우선순위 2: 기능 개선
+
+#### 4. 에러 처리 개선
+**현재**: 일부 에러가 사용자에게 명확하지 않음  
+**개선**:
+```typescript
+// frontend/src/services/api.ts
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ECONNABORTED') {
+      toast.error('서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.');
+    } else if (error.response?.status === 500) {
+      toast.error('서버 오류가 발생했습니다. 관리자에게 문의해주세요.');
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+#### 5. 로딩 상태 개선
+**현재**: 일부 페이지에서 로딩 표시 부족  
+**개선**:
+- 전역 로딩 인디케이터 추가
+- Skeleton UI 개선
+- 낙관적 업데이트 구현
+
+#### 6. 성능 모니터링
+**도구**: Sentry 또는 LogRocket  
+**설정**:
+```typescript
+// frontend/src/main.tsx
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  environment: import.meta.env.MODE,
+  tracesSampleRate: 1.0,
+});
 ```
 
 ---
 
-## 📋 체크리스트
+## 🚀 Phase 4: 기능 확장 (1개월)
 
-### Day 1: 발송 모니터링
-- [ ] WebSocket 서버 설정
-- [ ] 실시간 진행률 API
-- [ ] 발송 로그 스트림 API
-- [ ] 일시정지/재개 기능
-- [ ] 프론트엔드 모니터링 페이지
-- [ ] 실시간 업데이트 UI
+### 1. 사용자 인증 시스템
+**목표**: 여러 사용자가 각자의 데이터를 관리  
+**기술 스택**: JWT + Passport.js  
+**구현**:
+```
+- 회원가입 / 로그인
+- 비밀번호 재설정
+- 이메일 인증
+- 소셜 로그인 (Google, Kakao)
+```
 
-### Day 2: 상세 분석
-- [ ] ROI 계산 로직
-- [ ] 고객 세그먼트 분석
-- [ ] 시계열 데이터 API
-- [ ] 상품 비교 분석
-- [ ] 고급 차트 컴포넌트
-- [ ] 데이터 내보내기 기능
+**데이터베이스 스키마**:
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  products  Product[]
+  contacts  Contact[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-### Day 3: 설정 관리
-- [ ] API 키 CRUD
-- [ ] 메시지 템플릿 관리
-- [ ] 알림 설정 API
-- [ ] 설정 페이지 UI
-- [ ] 템플릿 에디터
-- [ ] 알림 테스트 기능
+enum Role {
+  USER
+  ADMIN
+}
+```
 
-### Day 4: 모바일 최적화
-- [ ] 반응형 네비게이션
-- [ ] 터치 제스처 지원
-- [ ] 모바일 테이블 최적화
-- [ ] PWA 매니페스트
-- [ ] Service Worker
-- [ ] 푸시 알림 설정
+### 2. 이미지 합성 템플릿 추가
+**현재**: Grid, Highlight, Simple 3개  
+**추가**:
+- Carousel (슬라이드 형식)
+- Collage (콜라주 형식)
+- Story (인스타그램 스토리 형식)
+- Banner (배너 형식)
 
-### Day 5: 성능 최적화
-- [ ] 코드 스플리팅 적용
-- [ ] 이미지 최적화
-- [ ] 번들 크기 분석
-- [ ] E2E 테스트 작성
-- [ ] 성능 테스트 실행
-- [ ] Lighthouse 점수 확인
+### 3. 예약 발송 기능 강화
+**현재**: 기본 예약 발송  
+**개선**:
+- 반복 발송 (매일, 매주, 매월)
+- 조건부 발송 (특정 이벤트 발생 시)
+- A/B 테스트 (여러 메시지 비교)
 
----
+### 4. 고급 분석 기능
+**추가 지표**:
+- 시간대별 분석
+- 지역별 분석
+- 디바이스별 분석
+- 코호트 분석
+- 퍼널 분석
 
-## 🎯 성공 지표
-
-### 기능적 지표
-- [ ] 발송 모니터링 실시간 업데이트 < 1초
-- [ ] 분석 리포트 로딩 시간 < 3초
-- [ ] 모바일 사용성 점수 90+
-- [ ] PWA 설치 가능
-- [ ] 오프라인 기본 기능 동작
-
-### 성능 지표
-- [ ] Lighthouse Performance 90+
-- [ ] Lighthouse Accessibility 90+
-- [ ] Lighthouse Best Practices 90+
-- [ ] Lighthouse SEO 90+
-- [ ] 번들 크기 < 500KB (gzipped)
-
-### 사용자 경험 지표
-- [ ] 첫 화면 로딩 < 2초
-- [ ] 페이지 전환 < 500ms
-- [ ] 모바일 터치 반응성 우수
-- [ ] 에러 복구 기능 완비
-- [ ] 직관적인 UI/UX
+### 5. 자동화 워크플로우
+**예시**:
+```
+1. 신상품 등록 → 자동 이미지 합성 → 자동 발송
+2. 클릭 없는 고객 → 3일 후 재발송
+3. 구매 고객 → 감사 메시지 자동 발송
+```
 
 ---
 
-## 📞 일일 체크인
+## 💼 Phase 5: 비즈니스 확장 (3개월)
 
-### 매일 오전 9시
-- [ ] 전날 작업 결과 확인
-- [ ] 당일 목표 설정
-- [ ] 블로커 이슈 확인
+### 1. SaaS 전환
+**목표**: 여러 고객에게 서비스 제공  
+**구현**:
+- 멀티 테넌시 아키텍처
+- 구독 플랜 (Free, Pro, Enterprise)
+- 결제 시스템 (Stripe, Toss Payments)
+- 사용량 제한 및 모니터링
 
-### 매일 오후 6시
-- [ ] 당일 완료 작업 정리
-- [ ] 테스트 결과 확인
-- [ ] 다음날 계획 수립
+**구독 플랜 예시**:
+```
+Free:
+- 상품 10개
+- 연락처 100개
+- 월 100건 발송
+
+Pro ($29/월):
+- 상품 100개
+- 연락처 1,000개
+- 월 1,000건 발송
+
+Enterprise ($99/월):
+- 무제한 상품
+- 무제한 연락처
+- 월 10,000건 발송
+```
+
+### 2. API 공개
+**목표**: 외부 개발자가 Moodon API 사용  
+**구현**:
+- API 키 발급 시스템
+- Rate Limiting
+- API 문서 (Swagger UI)
+- SDK 제공 (JavaScript, Python)
+
+### 3. 통합 기능
+**연동 서비스**:
+- 쇼핑몰 (Shopify, Cafe24, 스마트스토어)
+- CRM (Salesforce, HubSpot)
+- 마케팅 도구 (Google Analytics, Facebook Pixel)
+- 결제 (Stripe, Toss)
+
+### 4. 모바일 앱
+**플랫폼**: React Native  
+**기능**:
+- 상품 등록 (카메라 촬영)
+- 간편 발송
+- 실시간 알림
+- 통계 확인
 
 ---
 
-## 🚀 완료 후 기대 효과
+## 🛠️ 기술 부채 해결
 
-### 1. 완전한 프로덕션 시스템
-- 실시간 모니터링으로 안정적인 발송 관리
-- 데이터 기반 의사결정을 위한 고급 분석
-- 언제 어디서나 사용 가능한 모바일 지원
+### 1. 코드 리팩토링
+**목표**: 코드 품질 개선  
+**작업**:
+- 중복 코드 제거
+- 타입 안정성 강화
+- 컴포넌트 분리
+- 테스트 커버리지 증가 (현재 69개 → 150개+)
 
-### 2. 확장 가능한 아키텍처
-- 모듈화된 설정 관리 시스템
-- PWA 기반 오프라인 지원
-- 성능 최적화된 사용자 경험
+### 2. 성능 최적화
+**프론트엔드**:
+- 코드 스플리팅 강화
+- 이미지 최적화 (WebP, lazy loading)
+- 번들 크기 감소 (현재 2.4MB → 1.5MB)
+- React Query 캐싱 전략 개선
 
-### 3. 비즈니스 가치 창출
-- ROI 분석을 통한 마케팅 효율성 개선
-- 실시간 모니터링으로 발송 성공률 향상
-- 모바일 지원으로 사용자 접근성 확대
+**백엔드**:
+- 데이터베이스 인덱스 최적화
+- N+1 쿼리 문제 해결
+- Redis 캐싱 도입
+- API 응답 시간 개선 (현재 200ms → 100ms)
+
+### 3. 보안 강화
+**작업**:
+- SQL Injection 방어 (Prisma로 이미 방어됨)
+- XSS 방어 강화
+- CSRF 토큰 구현
+- Rate Limiting 강화
+- API 키 로테이션
+- 정기 보안 감사
+
+### 4. 인프라 개선
+**작업**:
+- CI/CD 파이프라인 구축 (GitHub Actions)
+- 자동 테스트 실행
+- 자동 배포
+- 롤백 시스템
+- 블루-그린 배포
 
 ---
 
-**스프린트 8 완료 시 전체 시스템이 100% 완성되며, 즉시 프로덕션 배포가 가능한 상태가 됩니다!** 🎉
+## 📊 성공 지표 (KPI)
+
+### Phase 3 (안정화)
+- [ ] 에러율 < 1%
+- [ ] API 응답 시간 < 200ms (평균)
+- [ ] 페이지 로드 시간 < 2초
+- [ ] 테스트 커버리지 > 80%
+
+### Phase 4 (기능 확장)
+- [ ] 월간 활성 사용자 (MAU) > 10명
+- [ ] 일일 발송 건수 > 100건
+- [ ] 사용자 만족도 > 4.5/5
+- [ ] 기능 사용률 > 70%
+
+### Phase 5 (비즈니스)
+- [ ] 유료 사용자 > 5명
+- [ ] 월 매출 > $100
+- [ ] 고객 유지율 > 80%
+- [ ] NPS 점수 > 50
+
+---
+
+## 🗓️ 타임라인
+
+### Week 1-2: 안정화
+```
+Day 1-3:   테스트 페이지 오류 수정, Vercel 도메인 고정
+Day 4-7:   에러 처리 개선, 로딩 상태 개선
+Day 8-10:  성능 모니터링 설정, Railway 최적화
+Day 11-14: 전체 통합 테스트, 버그 수정
+```
+
+### Week 3-4: 기능 개선
+```
+Day 15-18: 사용자 인증 시스템 구현
+Day 19-21: 이미지 템플릿 추가
+Day 22-25: 예약 발송 강화
+Day 26-28: 고급 분석 기능
+```
+
+### Month 2: 확장
+```
+Week 5-6:  자동화 워크플로우
+Week 7-8:  멀티 테넌시 구현
+```
+
+### Month 3: 비즈니스
+```
+Week 9-10:  구독 및 결제 시스템
+Week 11-12: API 공개 및 문서화
+```
+
+---
+
+## 💡 우선순위 결정 기준
+
+### High Priority (즉시 실행)
+- 사용자 경험에 직접 영향
+- 시스템 안정성 관련
+- 보안 이슈
+
+### Medium Priority (1-2주 내)
+- 기능 개선
+- 성능 최적화
+- 코드 품질
+
+### Low Priority (1개월+)
+- 새로운 기능 추가
+- 비즈니스 확장
+- 실험적 기능
+
+---
+
+## 🎯 즉시 실행할 작업 (이번 주)
+
+### 1. Vercel 도메인 고정 (30분)
+```
+1. Vercel Dashboard 접속
+2. frontend 프로젝트 → Settings → Domains
+3. Production Domain 확인
+4. Railway CORS_ORIGIN 업데이트
+```
+
+### 2. Health Check 크론잡 설정 (1시간)
+```
+1. GitHub Actions 워크플로우 생성
+2. 5분마다 Railway 핑
+3. 콜드 스타트 방지
+```
+
+### 3. 에러 로깅 설정 (2시간)
+```
+1. Sentry 계정 생성 (무료)
+2. 프론트엔드 Sentry 설정
+3. 백엔드 Sentry 설정
+4. 에러 알림 설정
+```
+
+### 4. 실제 데이터 테스트 (1시간)
+```
+1. 상품 3개 등록
+2. 이미지 합성
+3. 연락처 10개 추가
+4. 본인 번호로 발송 테스트
+5. 통계 확인
+```
+
+---
+
+## 📝 다음 회의 안건
+
+1. Vercel 도메인 고정 완료 확인
+2. 실제 데이터 테스트 결과 공유
+3. Phase 4 기능 우선순위 논의
+4. 비즈니스 모델 검토
+
+---
+
+**작성일**: 2025-11-12  
+**다음 리뷰**: 2025-11-19  
+**담당자**: 개발팀  
+**상태**: 📋 계획 수립 완료
