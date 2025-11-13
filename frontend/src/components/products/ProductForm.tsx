@@ -6,6 +6,8 @@ import { X, Upload, Loader2 } from 'lucide-react';
 import { useProducts } from '../../hooks/useProducts';
 import { Product } from '../../types/product';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+
 const productSchema = z.object({
   name: z.string().min(1, '상품명을 입력해주세요'),
   price: z.number().min(0, '가격은 0 이상이어야 합니다'),
@@ -165,7 +167,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           formData.append('images', file);
         });
 
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
         const response = await fetch(`${API_BASE_URL}/products/${resultProduct.id}/images/multiple`, {
           method: 'POST',
           body: formData,
@@ -181,7 +182,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         if (isEditMode) {
           console.log('편집 완료 - 이미지 재합성 시작');
           try {
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
             const composeResponse = await fetch(`${API_BASE_URL}/composer/products/${resultProduct.id}/compose?templateType=grid`, {
               method: 'POST',
             });

@@ -11,6 +11,8 @@ import {
   MessageSquare
 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+
 interface SendJobProgress {
   jobId: string;
   status: string;
@@ -45,7 +47,6 @@ export const SendMonitor: React.FC = () => {
     if (!jobId) return;
     
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
       const response = await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/monitor`);
       const data = await response.json();
       setProgress(data);
@@ -58,8 +59,7 @@ export const SendMonitor: React.FC = () => {
   const fetchLogs = async () => {
     if (!jobId) return;
     
-    try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+    try:
       const response = await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/logs/live?limit=20`);
       const data = await response.json();
       setLogs(data);
@@ -73,7 +73,6 @@ export const SendMonitor: React.FC = () => {
     if (!jobId) return;
     
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
       await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/pause`, { method: 'POST' });
       fetchProgress();
     } catch (error) {
@@ -86,7 +85,6 @@ export const SendMonitor: React.FC = () => {
     if (!jobId) return;
     
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
       await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/resume`, { method: 'POST' });
       fetchProgress();
     } catch (error) {

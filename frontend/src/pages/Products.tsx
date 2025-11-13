@@ -5,6 +5,8 @@ import { ProductDetailModal } from '../components/products/ProductDetailModal';
 import { Product, QueryProductParams } from '../types/product';
 import { Plus, Search, Filter, Download, Upload } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+
 export const Products: React.FC = () => {
   const [filters, setFilters] = useState<QueryProductParams>({
     page: 1,
@@ -40,7 +42,6 @@ export const Products: React.FC = () => {
   const handleEditProduct = async (product: Product) => {
     try {
       // 상품 상세 정보 조회 (모든 이미지 포함)
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
       const response = await fetch(`${API_BASE_URL}/products/${product.id}`);
       if (!response.ok) {
         throw new Error('상품 정보를 불러오는데 실패했습니다.');
@@ -59,7 +60,6 @@ export const Products: React.FC = () => {
   const handleViewProduct = async (product: Product) => {
     try {
       // 상품 상세 정보 조회 (모든 이미지 포함)
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
       const response = await fetch(`${API_BASE_URL}/products/${product.id}`);
       if (!response.ok) {
         throw new Error('상품 정보를 불러오는데 실패했습니다.');
