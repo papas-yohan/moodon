@@ -143,6 +143,7 @@ async function bootstrap() {
     logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
   }
   logger.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.log(`🔒 CORS: Allowing all *.vercel.app domains`);
 }
 
 bootstrap().catch((error) => {
