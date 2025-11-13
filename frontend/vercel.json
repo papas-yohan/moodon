@@ -1,16 +1,29 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://backend-production-c41fe.up.railway.app/api/:path*"
+      "source": "/api/v1/:path*",
+      "destination": "https://backend-production-c41fe.up.railway.app/api/v1/:path*"
     },
     {
       "source": "/uploads/:path*",
       "destination": "https://backend-production-c41fe.up.railway.app/uploads/:path*"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/.*",
+      "dest": "https://backend-production-c41fe.up.railway.app"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/uploads/.*",
+      "dest": "https://backend-production-c41fe.up.railway.app"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "headers": [
