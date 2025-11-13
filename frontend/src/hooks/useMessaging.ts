@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL || '/api/v1'}/messaging`;
+// Use Railway backend URL directly in production
+const API_BASE_URL = import.meta.env.MODE === 'production'
+  ? 'https://backend-production-c41fe.up.railway.app/api/v1/messaging'
+  : `${import.meta.env.VITE_API_URL || '/api/v1'}/messaging`;
 
 // 발송 작업 생성 DTO
 export interface CreateSendJobDto {
