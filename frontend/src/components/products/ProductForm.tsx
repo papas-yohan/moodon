@@ -165,7 +165,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           formData.append('images', file);
         });
 
-        const response = await fetch(`/api/v1/products/${resultProduct.id}/images/multiple`, {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+        const response = await fetch(`${API_BASE_URL}/products/${resultProduct.id}/images/multiple`, {
           method: 'POST',
           body: formData,
         });
@@ -180,7 +181,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         if (isEditMode) {
           console.log('편집 완료 - 이미지 재합성 시작');
           try {
-            const composeResponse = await fetch(`/api/v1/composer/products/${resultProduct.id}/compose?templateType=grid`, {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+            const composeResponse = await fetch(`${API_BASE_URL}/composer/products/${resultProduct.id}/compose?templateType=grid`, {
               method: 'POST',
             });
             

@@ -45,7 +45,8 @@ export const SendMonitor: React.FC = () => {
     if (!jobId) return;
     
     try {
-      const response = await fetch(`/api/v1/messaging/send-jobs/${jobId}/monitor`);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/monitor`);
       const data = await response.json();
       setProgress(data);
     } catch (error) {
@@ -58,7 +59,8 @@ export const SendMonitor: React.FC = () => {
     if (!jobId) return;
     
     try {
-      const response = await fetch(`/api/v1/messaging/send-jobs/${jobId}/logs/live?limit=20`);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const response = await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/logs/live?limit=20`);
       const data = await response.json();
       setLogs(data);
     } catch (error) {
@@ -71,7 +73,8 @@ export const SendMonitor: React.FC = () => {
     if (!jobId) return;
     
     try {
-      await fetch(`/api/v1/messaging/send-jobs/${jobId}/pause`, { method: 'POST' });
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/pause`, { method: 'POST' });
       fetchProgress();
     } catch (error) {
       console.error('일시정지 실패:', error);
@@ -83,7 +86,8 @@ export const SendMonitor: React.FC = () => {
     if (!jobId) return;
     
     try {
-      await fetch(`/api/v1/messaging/send-jobs/${jobId}/resume`, { method: 'POST' });
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/resume`, { method: 'POST' });
       fetchProgress();
     } catch (error) {
       console.error('재개 실패:', error);

@@ -65,7 +65,8 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
       
       // 상세 정보 조회하여 모든 이미지 확인
       try {
-        const detailResponse = await fetch(`/api/v1/products/${data.id}`);
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+        const detailResponse = await fetch(`${API_BASE_URL}/products/${data.id}`);
         if (!detailResponse.ok) {
           throw new Error('상품 정보를 불러올 수 없습니다.');
         }
@@ -80,7 +81,8 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
         
         toast.loading('이미지 합성 중...', { id: 'compose' });
         
-        const response = await fetch(`/api/v1/composer/products/${data.id}/compose`, {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+        const response = await fetch(`${API_BASE_URL}/composer/products/${data.id}/compose`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
