@@ -59,7 +59,7 @@ export const SendMonitor: React.FC = () => {
   const fetchLogs = async () => {
     if (!jobId) return;
     
-    try:
+    try {
       const response = await fetch(`${API_BASE_URL}/messaging/send-jobs/${jobId}/logs/live?limit=20`);
       const data = await response.json();
       setLogs(data);
