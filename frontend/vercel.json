@@ -1,15 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path(.*)",
-      "destination": "https://backend-production-c41fe.up.railway.app/api/:path"
-    },
-    {
-      "source": "/uploads/:path(.*)",
-      "destination": "https://backend-production-c41fe.up.railway.app/uploads/:path"
-    },
-    {
-      "source": "/:path((?!api|uploads).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],

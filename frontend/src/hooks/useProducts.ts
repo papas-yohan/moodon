@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { QueryProductDto, QueryProductParams, CreateProductDto, UpdateProductDto, ProductsResponse, ProductsHookResponse } from '../types/product';
 
-const API_BASE_URL = '/api/v1/products';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || '/api/v1'}/products`;
 
 // API 함수들
 const productsApi = {
