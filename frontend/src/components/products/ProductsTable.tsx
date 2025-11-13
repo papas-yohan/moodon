@@ -28,11 +28,13 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
 
   // 디버깅: 데이터 구조 확인
   React.useEffect(() => {
+    console.log('ProductsTable - isLoading:', isLoading);
+    console.log('ProductsTable - productsData:', productsData);
     if (productsData) {
-      console.log('ProductsTable - productsData:', productsData);
       console.log('ProductsTable - products array:', productsData.products);
+      console.log('ProductsTable - products length:', productsData.products?.length);
     }
-  }, [productsData]);
+  }, [productsData, isLoading]);
 
   // 액션 버튼 렌더러
   const ActionCellRenderer = ({ data }: { data: Product }) => {

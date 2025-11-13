@@ -161,10 +161,16 @@ export const useProducts = (params?: QueryProductParams) => {
     queryKey: ['products', defaultParams],
     queryFn: () => productsApi.getProducts(defaultParams),
     staleTime: 5 * 60 * 1000, // 5분
-    select: (data: ProductsResponse): ProductsHookResponse => ({
-      products: data.data || [],
-      pagination: data.meta || { total: 0, page: 1, limit: 20, totalPages: 1 }
-    }),
+    select: (data: ProductsResponse): ProductsHookResponse => {
+      console.log('useProducts - Raw API response:', data);
+      console.log('useProducts - data.data:', data.data);
+      console.log('useProducts - data.meta:', data.meta);
+      
+      return {
+        products: data.data || [],
+        pagination: data.meta || { total: 0, page: 1, limit: 20, totalPages: 1 }
+      };
+    },
   });
 
   // 개별 쿼리 함수
