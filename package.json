@@ -1,31 +1,10 @@
 {
-  "name": "product-marketing-system",
+  "name": "moodon",
   "version": "1.0.0",
-  "description": "AI 이미지 합성 기반 상품 마케팅 자동화 플랫폼",
   "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run start:dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:backend": "cd backend && npm run test",
-    "test:frontend": "cd frontend && npm run test",
-    "lint": "npm run lint:backend && npm run lint:frontend",
-    "lint:backend": "cd backend && npm run lint",
-    "lint:frontend": "cd frontend && npm run lint"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  },
-  "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=9.0.0"
+    "install": "cd frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "dev": "cd frontend && npm run dev"
   }
 }
