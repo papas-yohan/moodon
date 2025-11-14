@@ -1,10 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { QueryProductDto, QueryProductParams, CreateProductDto, UpdateProductDto, ProductsResponse, ProductsHookResponse } from '../types/product';
 
-// Use Railway backend URL directly in production
-const API_BASE_URL = import.meta.env.MODE === 'production'
-  ? 'https://backend-production-c41fe.up.railway.app/api/v1/products'
-  : `${import.meta.env.VITE_API_URL || '/api/v1'}/products`;
+// Always use Railway backend URL (environment variables not working in Vercel)
+const API_BASE_URL = 'https://backend-production-c41fe.up.railway.app/api/v1/products';
 
 // API 함수들
 const productsApi = {

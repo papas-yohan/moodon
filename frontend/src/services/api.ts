@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// Use Railway backend URL directly in production
-const API_BASE_URL = import.meta.env.MODE === 'production'
-  ? 'https://backend-production-c41fe.up.railway.app/api/v1'
-  : (import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1');
+// Always use Railway backend URL (environment variables not working in Vercel)
+const API_BASE_URL = 'https://backend-production-c41fe.up.railway.app/api/v1';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
