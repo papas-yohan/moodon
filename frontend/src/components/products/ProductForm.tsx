@@ -165,15 +165,29 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           formData.append('images', file);
         });
 
-        const response = await fetch(`${API_BASE_URL}/products/${resultProduct.id}/images/multiple`, {
-          method: 'POST',
-          body: formData,
-        });
+        try {
+          const response = await fetch(`${API_BASE_URL}/products/${resultProduct.id}/images/multiple`, {
+            method: 'POST',
+            body: formData,
+          });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('이미지 업로드 오류:', errorData);
-          throw new Error(errorData.message || '이미지 업로드에 실패했습니다.');
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('이미지 업로드 오류:', errorData);
+            throw new Error(errorData.message || '이미지 업로드에 실패했습니다.');
+          }
+          
+          console.log('이미지 업로드 성공');
+        } catch (imageError) {
+          console.error('이미지 업로드 실패:', imageError);
+          // 이미지 업로드 실패 시 상품은 생성되었지만 이미지가 없음을 알림
+          const errorMessage = imageError instanceof Error ? imageError.message : '알 수 없는 오류';
+          alert(`상품은 등록되었지만 이미지 업로드에 실패했습니다.\n상품을 수정하여 이미지를 다시 업로드해주세요.\n\n에러: ${errorMessage}`);
+          handleClose();
+          setTimeout(() => {
+            onSuccess?.();
+          }, 500);
+          return; // 여기서 종료
         }
 
         // 편집 모드에서 이미지 변경 시 재합성 트리거
