@@ -5,8 +5,7 @@ import { z } from 'zod';
 import { X, Upload, Loader2 } from 'lucide-react';
 import { useProducts } from '../../hooks/useProducts';
 import { Product } from '../../types/product';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+import { API_BASE_URL } from '../../config/api';
 
 const productSchema = z.object({
   name: z.string().min(1, '상품명을 입력해주세요'),
@@ -77,7 +76,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       
       // 기존 이미지 미리보기 설정
       if (product.images && product.images.length > 0) {
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
         const baseUrl = API_BASE_URL.replace('/api/v1', '');
         const existingImageUrls = product.images.map(img => 
           img.imageUrl.replace(baseUrl, '')

@@ -72,8 +72,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     {product.images.map((image, index) => {
                       // URL 정규화
-                      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
-                      const baseUrl = API_BASE_URL.replace('/api/v1', '');
+                      const baseUrl = 'https://backend-production-c41fe.up.railway.app';
                       const normalizedUrl = image.imageUrl.startsWith('http') 
                         ? image.imageUrl 
                         : `${baseUrl}${image.imageUrl.startsWith('/') ? '' : '/'}${image.imageUrl}`;
@@ -257,8 +256,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   <div className="bg-gray-100 rounded-lg overflow-hidden">
                     <img
                       src={(() => {
-                        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
-                        const baseUrl = API_BASE_URL.replace('/api/v1', '');
+                        const baseUrl = 'https://backend-production-c41fe.up.railway.app';
                         return product.composedImageUrl.startsWith('http') 
                           ? product.composedImageUrl 
                           : `${baseUrl}${product.composedImageUrl.startsWith('/') ? '' : '/'}${product.composedImageUrl}`;

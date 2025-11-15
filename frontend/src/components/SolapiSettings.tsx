@@ -28,7 +28,7 @@ export const SolapiSettings: React.FC = () => {
   const loadApiKeys = async () => {
     try {
       setLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const API_BASE_URL = 'https://backend-production-c41fe.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/settings/api-keys`);
       const data = await response.json();
       setApiKeys(data);
@@ -56,7 +56,7 @@ export const SolapiSettings: React.FC = () => {
 
     try {
       setSaving(true);
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const API_BASE_URL = 'https://backend-production-c41fe.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/settings/api-keys/${type}`, {
         method: 'PUT',
         headers: {
@@ -92,7 +92,7 @@ export const SolapiSettings: React.FC = () => {
   const handleReload = async () => {
     try {
       setSaving(true);
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const API_BASE_URL = 'https://backend-production-c41fe.up.railway.app/api/v1';
       const response = await fetch(`${API_BASE_URL}/settings/reload-api-keys`, {
         method: 'POST',
       });
