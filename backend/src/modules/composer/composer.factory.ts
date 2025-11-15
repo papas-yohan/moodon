@@ -1,7 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { IImageComposer, ComposerType } from './interfaces/image-composer.interface';
-import { SharpComposer } from './composers/sharp-composer';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import {
+  IImageComposer,
+  ComposerType,
+} from "./interfaces/image-composer.interface";
+import { SharpComposer } from "./composers/sharp-composer";
 
 /**
  * 이미지 합성기 팩토리
@@ -21,7 +24,7 @@ export class ComposerFactory {
    */
   create(): IImageComposer {
     const composerType = this.configService.get<string>(
-      'IMAGE_COMPOSER_TYPE',
+      "IMAGE_COMPOSER_TYPE",
       ComposerType.SHARP,
     );
 

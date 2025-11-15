@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
 
-describe('AppController', () => {
+describe("AppController", () => {
   let appController: AppController;
 
   beforeEach(async () => {
@@ -14,13 +14,13 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return app info', () => {
+  describe("root", () => {
+    it("should return app info", () => {
       const result = appController.getHello();
-      expect(result).toHaveProperty('name');
-      expect(result).toHaveProperty('version');
-      expect(result).toHaveProperty('description');
-      expect((result as any).name).toBe('Product Marketing System API');
+      expect(result).toHaveProperty("name");
+      expect(result).toHaveProperty("version");
+      expect(result).toHaveProperty("description");
+      expect((result as any).name).toBe("Product Marketing System API");
     });
   });
 });

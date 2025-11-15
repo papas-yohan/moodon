@@ -18,7 +18,7 @@ export interface ProductInfo {
 }
 
 export interface ComposeOptions {
-  templateType: 'grid' | 'highlight' | 'simple';
+  templateType: "grid" | "highlight" | "simple";
   productInfo: ProductInfo;
 }
 
@@ -77,8 +77,8 @@ export interface IImageComposer {
  * 합성기 타입
  */
 export enum ComposerType {
-  SHARP = 'sharp',
-  STABILITY_AI = 'stability-ai',
-  OPENAI = 'openai',
-  REPLICATE = 'replicate',
+  SHARP = "sharp",
+  STABILITY_AI = "stability-ai",
+  OPENAI = "openai",
+  REPLICATE = "replicate",
 }

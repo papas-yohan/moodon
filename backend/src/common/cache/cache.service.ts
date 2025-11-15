@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class CacheService {
@@ -12,7 +12,7 @@ export class CacheService {
    * 캐시에 데이터 저장
    */
   set(key: string, data: any, ttlSeconds: number = 300): void {
-    const expiry = Date.now() + (ttlSeconds * 1000);
+    const expiry = Date.now() + ttlSeconds * 1000;
     this.cache.set(key, { data, expiry });
     this.logger.debug(`Cache set: ${key} (TTL: ${ttlSeconds}s)`);
   }
@@ -22,7 +22,7 @@ export class CacheService {
    */
   get<T>(key: string): T | null {
     const cached = this.cache.get(key);
-    
+
     if (!cached) {
       return null;
     }
@@ -55,15 +55,17 @@ export class CacheService {
   deletePattern(pattern: string): number {
     let deletedCount = 0;
     const regex = new RegExp(pattern);
-    
+
     for (const key of this.cache.keys()) {
       if (regex.test(key)) {
         this.cache.delete(key);
         deletedCount++;
       }
     }
-    
-    this.logger.debug(`Cache pattern deleted: ${pattern} (${deletedCount} keys)`);
+
+    this.logger.debug(
+      `Cache pattern deleted: ${pattern} (${deletedCount} keys)`,
+    );
     return deletedCount;
   }
 
@@ -73,18 +75,18 @@ export class CacheService {
   cleanup(): number {
     let cleanedCount = 0;
     const now = Date.now();
-    
+
     for (const [key, cached] of this.cache.entries()) {
       if (now > cached.expiry) {
         this.cache.delete(key);
         cleanedCount++;
       }
     }
-    
+
     if (cleanedCount > 0) {
       this.logger.debug(`Cache cleanup: ${cleanedCount} expired keys removed`);
     }
-    
+
     return cleanedCount;
   }
 
@@ -114,7 +116,7 @@ export class CacheService {
 export class CacheKeyBuilder {
   static products(filters: any): string {
     const { page, limit, search, category, status, sort } = filters;
-    return `products:${page}:${limit}:${search || ''}:${category || ''}:${status || ''}:${sort || ''}`;
+    return `products:${page}:${limit}:${search || ""}:${category || ""}:${status || ""}:${sort || ""}`;
   }
 
   static product(id: string): string {
@@ -123,14 +125,14 @@ export class CacheKeyBuilder {
 
   static contacts(filters: any): string {
     const { page, limit, search, groupName } = filters;
-    return `contacts:${page}:${limit}:${search || ''}:${groupName || ''}`;
+    return `contacts:${page}:${limit}:${search || ""}:${groupName || ""}`;
   }
 
   static analytics(type: string, params: any): string {
     const paramStr = Object.entries(params)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}:${v}`)
-      .join(':');
+      .join(":");
     return `analytics:${type}:${paramStr}`;
   }
 }

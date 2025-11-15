@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class HealthService {
@@ -7,7 +7,7 @@ export class HealthService {
 
   async check() {
     return {
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV,
@@ -21,11 +21,13 @@ export class HealthService {
       this.checkMemory(),
     ]);
 
-    const database = checks[0].status === 'fulfilled' ? 'healthy' : 'unhealthy';
-    const redis = checks[1].status === 'fulfilled' ? 'healthy' : 'unhealthy';
-    const memory = checks[2].status === 'fulfilled' ? checks[2].value : 'unhealthy';
+    const database = checks[0].status === "fulfilled" ? "healthy" : "unhealthy";
+    const redis = checks[1].status === "fulfilled" ? "healthy" : "unhealthy";
+    const memory =
+      checks[2].status === "fulfilled" ? checks[2].value : "unhealthy";
 
-    const overallStatus = database === 'healthy' && redis === 'healthy' ? 'healthy' : 'unhealthy';
+    const overallStatus =
+      database === "healthy" && redis === "healthy" ? "healthy" : "unhealthy";
 
     return {
       status: overallStatus,
@@ -38,8 +40,14 @@ export class HealthService {
         memory,
       },
       details: {
-        database: checks[0].status === 'rejected' ? checks[0].reason?.message : 'Connected',
-        redis: checks[1].status === 'rejected' ? checks[1].reason?.message : 'Connected',
+        database:
+          checks[0].status === "rejected"
+            ? checks[0].reason?.message
+            : "Connected",
+        redis:
+          checks[1].status === "rejected"
+            ? checks[1].reason?.message
+            : "Connected",
       },
     };
   }
@@ -64,7 +72,7 @@ export class HealthService {
     };
 
     return {
-      status: memUsageMB.heapUsed < 500 ? 'healthy' : 'warning', // 500MB threshold
+      status: memUsageMB.heapUsed < 500 ? "healthy" : "warning", // 500MB threshold
       usage: memUsageMB,
     };
   }

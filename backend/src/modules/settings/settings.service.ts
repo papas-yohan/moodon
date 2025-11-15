@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
-import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import { ConfigService } from "@nestjs/config";
+import * as crypto from "crypto";
 
 export interface ApiKeySettings {
   solapiApiKey?: string;
@@ -19,7 +19,7 @@ export interface NotificationSettings {
 export interface MessageTemplate {
   id?: string;
   name: string;
-  type: 'SMS' | 'KAKAO' | 'EMAIL';
+  type: "SMS" | "KAKAO" | "EMAIL";
   subject?: string;
   content: string;
   variables: string[];
@@ -29,8 +29,9 @@ export interface MessageTemplate {
 @Injectable()
 export class SettingsService {
   private readonly logger = new Logger(SettingsService.name);
-  private readonly ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default-encryption-key-change-in-production';
-  private readonly ALGORITHM = 'aes-256-cbc';
+  private readonly ENCRYPTION_KEY =
+    process.env.ENCRYPTION_KEY || "default-encryption-key-change-in-production";
+  private readonly ALGORITHM = "aes-256-cbc";
 
   constructor(
     private prisma: PrismaService,
@@ -41,14 +42,14 @@ export class SettingsService {
    * 데이터 암호화
    */
   private encrypt(text: string): string {
-    const key = crypto.scryptSync(this.ENCRYPTION_KEY, 'salt', 32);
+    const key = crypto.scryptSync(this.ENCRYPTION_KEY, "salt", 32);
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(this.ALGORITHM, key, iv);
-    
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    
-    return iv.toString('hex') + ':' + encrypted;
+
+    let encrypted = cipher.update(text, "utf8", "hex");
+    encrypted += cipher.final("hex");
+
+    return iv.toString("hex") + ":" + encrypted;
   }
 
   /**
@@ -56,19 +57,19 @@ export class SettingsService {
    */
   private decrypt(text: string): string {
     try {
-      const key = crypto.scryptSync(this.ENCRYPTION_KEY, 'salt', 32);
-      const parts = text.split(':');
-      const iv = Buffer.from(parts[0], 'hex');
+      const key = crypto.scryptSync(this.ENCRYPTION_KEY, "salt", 32);
+      const parts = text.split(":");
+      const iv = Buffer.from(parts[0], "hex");
       const encrypted = parts[1];
-      
+
       const decipher = crypto.createDecipheriv(this.ALGORITHM, key, iv);
-      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
-      
+      let decrypted = decipher.update(encrypted, "hex", "utf8");
+      decrypted += decipher.final("utf8");
+
       return decrypted;
     } catch (error) {
-      this.logger.error('복호화 실패:', error);
-      return '';
+      this.logger.error("복호화 실패:", error);
+      return "";
     }
   }
 
@@ -76,8 +77,8 @@ export class SettingsService {
    * API 키 마스킹 (보안을 위해 일부만 표시)
    */
   private maskApiKey(apiKey: string): string {
-    if (!apiKey || apiKey.length < 8) return '****';
-    return apiKey.slice(0, 4) + '****' + apiKey.slice(-4);
+    if (!apiKey || apiKey.length < 8) return "****";
+    return apiKey.slice(0, 4) + "****" + apiKey.slice(-4);
   }
 
   /**
@@ -89,27 +90,36 @@ export class SettingsService {
       const settings = await this.prisma.setting.findMany({
         where: {
           key: {
-            in: ['SOLAPI_API_KEY', 'SOLAPI_API_SECRET', 'SOLAPI_SENDER', 'SOLAPI_KAKAO_PFID'],
+            in: [
+              "SOLAPI_API_KEY",
+              "SOLAPI_API_SECRET",
+              "SOLAPI_SENDER",
+              "SOLAPI_KAKAO_PFID",
+            ],
           },
         },
       });
 
       const result: ApiKeySettings = {};
 
-      settings.forEach(setting => {
+      settings.forEach((setting) => {
         const decryptedValue = this.decrypt(setting.value);
-        
+
         switch (setting.key) {
-          case 'SOLAPI_API_KEY':
-            result.solapiApiKey = decryptedValue ? this.maskApiKey(decryptedValue) : undefined;
+          case "SOLAPI_API_KEY":
+            result.solapiApiKey = decryptedValue
+              ? this.maskApiKey(decryptedValue)
+              : undefined;
             break;
-          case 'SOLAPI_API_SECRET':
-            result.solapiApiSecret = decryptedValue ? this.maskApiKey(decryptedValue) : undefined;
+          case "SOLAPI_API_SECRET":
+            result.solapiApiSecret = decryptedValue
+              ? this.maskApiKey(decryptedValue)
+              : undefined;
             break;
-          case 'SOLAPI_SENDER':
+          case "SOLAPI_SENDER":
             result.solapiSender = decryptedValue;
             break;
-          case 'SOLAPI_KAKAO_PFID':
+          case "SOLAPI_KAKAO_PFID":
             result.solapiKakaoPfid = decryptedValue;
             break;
         }
@@ -117,23 +127,25 @@ export class SettingsService {
 
       // DB에 없으면 환경 변수에서 가져오기
       if (!result.solapiApiKey) {
-        const envKey = this.configService.get('SOLAPI_API_KEY');
+        const envKey = this.configService.get("SOLAPI_API_KEY");
         result.solapiApiKey = envKey ? this.maskApiKey(envKey) : undefined;
       }
       if (!result.solapiApiSecret) {
-        const envSecret = this.configService.get('SOLAPI_API_SECRET');
-        result.solapiApiSecret = envSecret ? this.maskApiKey(envSecret) : undefined;
+        const envSecret = this.configService.get("SOLAPI_API_SECRET");
+        result.solapiApiSecret = envSecret
+          ? this.maskApiKey(envSecret)
+          : undefined;
       }
       if (!result.solapiSender) {
-        result.solapiSender = this.configService.get('SOLAPI_SENDER');
+        result.solapiSender = this.configService.get("SOLAPI_SENDER");
       }
       if (!result.solapiKakaoPfid) {
-        result.solapiKakaoPfid = this.configService.get('SOLAPI_KAKAO_PFID');
+        result.solapiKakaoPfid = this.configService.get("SOLAPI_KAKAO_PFID");
       }
 
       return result;
     } catch (error) {
-      this.logger.error('API 키 조회 실패:', error);
+      this.logger.error("API 키 조회 실패:", error);
       return {};
     }
   }
@@ -144,7 +156,7 @@ export class SettingsService {
   async updateApiKey(type: string, apiKey: string): Promise<void> {
     try {
       const encryptedValue = this.encrypt(apiKey);
-      
+
       await this.prisma.setting.upsert({
         where: { key: type },
         update: {
@@ -160,7 +172,7 @@ export class SettingsService {
       this.logger.log(`API 키 업데이트 성공: ${type}`);
     } catch (error) {
       this.logger.error(`API 키 업데이트 실패: ${type}`, error);
-      throw new Error('API 키 업데이트에 실패했습니다.');
+      throw new Error("API 키 업데이트에 실패했습니다.");
     }
   }
 
@@ -195,9 +207,11 @@ export class SettingsService {
     };
   }
 
-  async updateNotificationSettings(settings: NotificationSettings): Promise<NotificationSettings> {
+  async updateNotificationSettings(
+    settings: NotificationSettings,
+  ): Promise<NotificationSettings> {
     // 실제로는 DB에 저장
-    console.log('알림 설정 업데이트:', settings);
+    console.log("알림 설정 업데이트:", settings);
     return settings;
   }
 
@@ -206,58 +220,66 @@ export class SettingsService {
     // 기본 템플릿들 반환
     return [
       {
-        id: '1',
-        name: '신상품 알림',
-        type: 'SMS',
-        content: '안녕하세요 {{customerName}}님! 새로운 상품 {{productName}}이 출시되었습니다. 지금 확인해보세요! {{productUrl}}',
-        variables: ['customerName', 'productName', 'productUrl'],
+        id: "1",
+        name: "신상품 알림",
+        type: "SMS",
+        content:
+          "안녕하세요 {{customerName}}님! 새로운 상품 {{productName}}이 출시되었습니다. 지금 확인해보세요! {{productUrl}}",
+        variables: ["customerName", "productName", "productUrl"],
         isDefault: true,
       },
       {
-        id: '2',
-        name: '할인 이벤트',
-        type: 'KAKAO',
-        content: '🎉 특별 할인 이벤트! {{productName}}을 {{discountRate}}% 할인된 가격에 만나보세요. 기간: {{eventPeriod}}',
-        variables: ['productName', 'discountRate', 'eventPeriod'],
+        id: "2",
+        name: "할인 이벤트",
+        type: "KAKAO",
+        content:
+          "🎉 특별 할인 이벤트! {{productName}}을 {{discountRate}}% 할인된 가격에 만나보세요. 기간: {{eventPeriod}}",
+        variables: ["productName", "discountRate", "eventPeriod"],
         isDefault: true,
       },
       {
-        id: '3',
-        name: '이메일 뉴스레터',
-        type: 'EMAIL',
-        subject: '{{companyName}} 주간 뉴스레터',
-        content: '안녕하세요 {{customerName}}님,\n\n이번 주 추천 상품을 소개해드립니다.\n\n{{productList}}\n\n감사합니다.',
-        variables: ['companyName', 'customerName', 'productList'],
+        id: "3",
+        name: "이메일 뉴스레터",
+        type: "EMAIL",
+        subject: "{{companyName}} 주간 뉴스레터",
+        content:
+          "안녕하세요 {{customerName}}님,\n\n이번 주 추천 상품을 소개해드립니다.\n\n{{productList}}\n\n감사합니다.",
+        variables: ["companyName", "customerName", "productList"],
         isDefault: false,
       },
     ];
   }
 
-  async createMessageTemplate(template: Omit<MessageTemplate, 'id'>): Promise<MessageTemplate> {
+  async createMessageTemplate(
+    template: Omit<MessageTemplate, "id">,
+  ): Promise<MessageTemplate> {
     const newTemplate: MessageTemplate = {
       ...template,
       id: Date.now().toString(),
     };
-    
-    console.log('새 템플릿 생성:', newTemplate);
+
+    console.log("새 템플릿 생성:", newTemplate);
     return newTemplate;
   }
 
-  async updateMessageTemplate(id: string, template: Partial<MessageTemplate>): Promise<MessageTemplate> {
+  async updateMessageTemplate(
+    id: string,
+    template: Partial<MessageTemplate>,
+  ): Promise<MessageTemplate> {
     const templates = await this.getMessageTemplates();
-    const existing = templates.find(t => t.id === id);
-    
+    const existing = templates.find((t) => t.id === id);
+
     if (!existing) {
-      throw new Error('템플릿을 찾을 수 없습니다.');
+      throw new Error("템플릿을 찾을 수 없습니다.");
     }
 
     const updated = { ...existing, ...template };
-    console.log('템플릿 업데이트:', updated);
+    console.log("템플릿 업데이트:", updated);
     return updated;
   }
 
   async deleteMessageTemplate(id: string): Promise<void> {
-    console.log('템플릿 삭제:', id);
+    console.log("템플릿 삭제:", id);
   }
 
   // 시스템 설정
@@ -273,7 +295,7 @@ export class SettingsService {
   }
 
   async updateSystemSettings(settings: any) {
-    console.log('시스템 설정 업데이트:', settings);
+    console.log("시스템 설정 업데이트:", settings);
     return settings;
   }
 
@@ -281,19 +303,25 @@ export class SettingsService {
   extractVariables(content: string): string[] {
     const matches = content.match(/\{\{([^}]+)\}\}/g);
     if (!matches) return [];
-    
-    return matches.map(match => match.replace(/[{}]/g, ''));
+
+    return matches.map((match) => match.replace(/[{}]/g, ""));
   }
 
   // 템플릿 미리보기
-  previewTemplate(template: MessageTemplate, variables: Record<string, string>): string {
+  previewTemplate(
+    template: MessageTemplate,
+    variables: Record<string, string>,
+  ): string {
     let preview = template.content;
-    
-    template.variables.forEach(variable => {
+
+    template.variables.forEach((variable) => {
       const value = variables[variable] || `[${variable}]`;
-      preview = preview.replace(new RegExp(`\\{\\{${variable}\\}\\}`, 'g'), value);
+      preview = preview.replace(
+        new RegExp(`\\{\\{${variable}\\}\\}`, "g"),
+        value,
+      );
     });
-    
+
     return preview;
   }
 }

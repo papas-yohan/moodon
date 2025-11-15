@@ -1,12 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as sharp from 'sharp';
-import * as fs from 'fs/promises';
+import { Injectable, Logger } from "@nestjs/common";
+import * as sharp from "sharp";
+import * as fs from "fs/promises";
 import {
   IImageComposer,
   ImageInput,
   ComposeOptions,
   ComposedImage,
-} from '../interfaces/image-composer.interface';
+} from "../interfaces/image-composer.interface";
 
 /**
  * Sharp 라이브러리 기반 이미지 합성기
@@ -21,25 +21,36 @@ export class SharpComposer implements IImageComposer {
     options: ComposeOptions,
   ): Promise<ComposedImage> {
     const startTime = Date.now();
-    
+
     try {
-      this.logger.log(`Sharp composer: Starting composition with ${images.length} images`);
-      
+      this.logger.log(
+        `Sharp composer: Starting composition with ${images.length} images`,
+      );
+
       // 이미지 다운로드
       const imageBuffers = await this.downloadImages(images);
-      
+
       // 템플릿에 따른 합성
       let composedBuffer: Buffer;
-      
+
       switch (options.templateType) {
-        case 'grid':
-          composedBuffer = await this.createGridLayout(imageBuffers, options.productInfo);
+        case "grid":
+          composedBuffer = await this.createGridLayout(
+            imageBuffers,
+            options.productInfo,
+          );
           break;
-        case 'highlight':
-          composedBuffer = await this.createHighlightLayout(imageBuffers, options.productInfo);
+        case "highlight":
+          composedBuffer = await this.createHighlightLayout(
+            imageBuffers,
+            options.productInfo,
+          );
           break;
-        case 'simple':
-          composedBuffer = await this.createSimpleLayout(imageBuffers, options.productInfo);
+        case "simple":
+          composedBuffer = await this.createSimpleLayout(
+            imageBuffers,
+            options.productInfo,
+          );
           break;
         default:
           throw new Error(`Unsupported template type: ${options.templateType}`);
@@ -47,30 +58,30 @@ export class SharpComposer implements IImageComposer {
 
       // 메타데이터 추출
       const metadata = await sharp(composedBuffer).metadata();
-      
+
       const processingTime = (Date.now() - startTime) / 1000;
-      
+
       this.logger.log(`Sharp composer: Completed in ${processingTime}s`);
-      
+
       return {
         buffer: composedBuffer,
         metadata: {
           width: metadata.width || 0,
           height: metadata.height || 0,
-          format: metadata.format || 'jpeg',
+          format: metadata.format || "jpeg",
           size: composedBuffer.length,
         },
         processingTime,
-        composer: 'sharp',
+        composer: "sharp",
       };
     } catch (error) {
-      this.logger.error('Sharp composer: Composition failed', error);
+      this.logger.error("Sharp composer: Composition failed", error);
       throw error;
     }
   }
 
   getSupportedTemplates(): string[] {
-    return ['grid', 'highlight', 'simple'];
+    return ["grid", "highlight", "simple"];
   }
 
   canCompose(imageCount: number): boolean {
@@ -84,21 +95,21 @@ export class SharpComposer implements IImageComposer {
 
   private async downloadImages(images: ImageInput[]): Promise<Buffer[]> {
     const buffers: Buffer[] = [];
-    
+
     for (const image of images) {
       try {
         let localPath: string;
-        
-        if (image.url.startsWith('http://localhost:3000/uploads/')) {
-          localPath = image.url.replace('http://localhost:3000/', './');
-        } else if (image.url.startsWith('/uploads/')) {
-          localPath = '.' + image.url;
-        } else if (image.url.startsWith('uploads/')) {
-          localPath = './' + image.url;
+
+        if (image.url.startsWith("http://localhost:3000/uploads/")) {
+          localPath = image.url.replace("http://localhost:3000/", "./");
+        } else if (image.url.startsWith("/uploads/")) {
+          localPath = "." + image.url;
+        } else if (image.url.startsWith("uploads/")) {
+          localPath = "./" + image.url;
         } else {
           throw new Error(`Unsupported URL format: ${image.url}`);
         }
-        
+
         this.logger.debug(`Reading image from: ${localPath}`);
         const buffer = await fs.readFile(localPath);
         buffers.push(buffer);
@@ -107,7 +118,7 @@ export class SharpComposer implements IImageComposer {
         throw error;
       }
     }
-    
+
     return buffers;
   }
 
@@ -123,10 +134,13 @@ export class SharpComposer implements IImageComposer {
     const cardPadding = 20;
     const ctaButtonHeight = 80;
     const bottomPadding = 30;
-    
+
     // 그라데이션 배경 생성
-    const gradientBackground = await this.createGradientBackground(canvasWidth, canvasHeight);
-    
+    const gradientBackground = await this.createGradientBackground(
+      canvasWidth,
+      canvasHeight,
+    );
+
     const background = sharp(gradientBackground);
 
     // 이미지 그리드 끝 위치 계산
@@ -137,20 +151,24 @@ export class SharpComposer implements IImageComposer {
     const processedImages = await Promise.all(
       imageBuffers.slice(0, 6).map(async (buffer, index) => {
         // 이미지 리사이즈 및 라운드 코너
-        const processedImage = await this.addRoundedCorners(buffer, imageSize, 20);
-        
+        const processedImage = await this.addRoundedCorners(
+          buffer,
+          imageSize,
+          20,
+        );
+
         const row = Math.floor(index / 3);
         const col = index % 3;
         const left = padding + col * (imageSize + padding);
         const top = headerHeight + row * (imageSize + padding);
-        
+
         return { input: processedImage, left, top };
       }),
     );
 
     // 상단 헤더 카드
     const headerCard = await this.createHeaderCard(productInfo, canvasWidth);
-    
+
     const compositeElements = [
       {
         input: headerCard,
@@ -162,26 +180,26 @@ export class SharpComposer implements IImageComposer {
 
     // 하단 요소들의 위치 계산
     let currentY = imageGridEndY + padding;
-    
+
     // 설명이 있으면 추가
-    if (productInfo.description && productInfo.description.trim() !== '') {
+    if (productInfo.description && productInfo.description.trim() !== "") {
       const descriptionCard = await this.createDescriptionCard(
         productInfo.description,
         canvasWidth,
       );
-      
+
       // 설명 카드의 높이를 계산 (최대 5줄 * 32px + 패딩)
       const descriptionHeight = Math.min(
         this.wrapText(productInfo.description, 28).length * 32 + 60,
-        200
+        200,
       );
-      
+
       compositeElements.push({
         input: descriptionCard,
         top: currentY,
         left: 40,
       });
-      
+
       currentY += descriptionHeight + padding;
     }
 
@@ -192,7 +210,7 @@ export class SharpComposer implements IImageComposer {
       top: currentY,
       left: (canvasWidth - 600) / 2,
     });
-    
+
     const result = await background
       .composite(compositeElements)
       .jpeg({ quality: 95 })
@@ -210,18 +228,25 @@ export class SharpComposer implements IImageComposer {
     const mainImageSize = 700;
     const thumbSize = 150;
     const padding = 30;
-    
+
     // 그라데이션 배경
-    const gradientBackground = await this.createGradientBackground(canvasWidth, canvasHeight);
+    const gradientBackground = await this.createGradientBackground(
+      canvasWidth,
+      canvasHeight,
+    );
     const background = sharp(gradientBackground);
 
     const compositeImages = [];
-    
+
     // 메인 이미지 (라운드 코너 + 그림자)
     const mainImageTop = 200;
     if (imageBuffers.length > 0) {
-      const mainImage = await this.addRoundedCorners(imageBuffers[0], mainImageSize, 30);
-      
+      const mainImage = await this.addRoundedCorners(
+        imageBuffers[0],
+        mainImageSize,
+        30,
+      );
+
       compositeImages.push({
         input: mainImage,
         left: (canvasWidth - mainImageSize) / 2,
@@ -231,14 +256,19 @@ export class SharpComposer implements IImageComposer {
 
     // 썸네일 이미지들 (라운드 코너)
     const thumbnails = imageBuffers.slice(1, 5);
-    const thumbStartX = (canvasWidth - (thumbnails.length * (thumbSize + 15) - 15)) / 2;
+    const thumbStartX =
+      (canvasWidth - (thumbnails.length * (thumbSize + 15) - 15)) / 2;
     const thumbTop = mainImageTop + mainImageSize + padding;
-    
+
     for (let i = 0; i < thumbnails.length; i++) {
-      const thumbnail = await this.addRoundedCorners(thumbnails[i], thumbSize, 15);
-      
+      const thumbnail = await this.addRoundedCorners(
+        thumbnails[i],
+        thumbSize,
+        15,
+      );
+
       const left = thumbStartX + i * (thumbSize + 15);
-      
+
       compositeImages.push({
         input: thumbnail,
         left,
@@ -258,23 +288,23 @@ export class SharpComposer implements IImageComposer {
     let currentY = thumbTop + thumbSize + padding;
 
     // 상품 설명 카드
-    if (productInfo.description && productInfo.description.trim() !== '') {
+    if (productInfo.description && productInfo.description.trim() !== "") {
       const descriptionCard = await this.createDescriptionCard(
         productInfo.description,
         canvasWidth,
       );
-      
+
       const descriptionHeight = Math.min(
         this.wrapText(productInfo.description, 28).length * 32 + 60,
-        200
+        200,
       );
-      
+
       compositeImages.push({
         input: descriptionCard,
         top: currentY,
         left: 40,
       });
-      
+
       currentY += descriptionHeight + padding;
     }
 
@@ -303,23 +333,30 @@ export class SharpComposer implements IImageComposer {
     const imageSize = 500;
     const padding = 30;
     const headerHeight = 180;
-    
+
     // 그라데이션 배경
-    const gradientBackground = await this.createGradientBackground(canvasWidth, canvasHeight);
+    const gradientBackground = await this.createGradientBackground(
+      canvasWidth,
+      canvasHeight,
+    );
     const background = sharp(gradientBackground);
 
     const compositeImages = [];
-    
+
     // 이미지들을 세로로 배치 (라운드 코너)
     const imagesToShow = Math.min(imageBuffers.length, 2);
     const startY = headerHeight;
-    
+
     for (let i = 0; i < imagesToShow; i++) {
-      const processedImage = await this.addRoundedCorners(imageBuffers[i], imageSize, 25);
-      
+      const processedImage = await this.addRoundedCorners(
+        imageBuffers[i],
+        imageSize,
+        25,
+      );
+
       const left = (canvasWidth - imageSize) / 2;
       const top = startY + i * (imageSize + padding);
-      
+
       compositeImages.push({
         input: processedImage,
         left,
@@ -340,23 +377,23 @@ export class SharpComposer implements IImageComposer {
     let currentY = imageGridEndY + padding;
 
     // 상품 설명 카드
-    if (productInfo.description && productInfo.description.trim() !== '') {
+    if (productInfo.description && productInfo.description.trim() !== "") {
       const descriptionCard = await this.createDescriptionCard(
         productInfo.description,
         canvasWidth,
       );
-      
+
       const descriptionHeight = Math.min(
         this.wrapText(productInfo.description, 28).length * 32 + 60,
-        200
+        200,
       );
-      
+
       compositeImages.push({
         input: descriptionCard,
         top: currentY,
         left: 40,
       });
-      
+
       currentY += descriptionHeight + padding;
     }
 
@@ -379,7 +416,10 @@ export class SharpComposer implements IImageComposer {
   /**
    * 그라데이션 배경 생성
    */
-  private async createGradientBackground(width: number, height: number): Promise<Buffer> {
+  private async createGradientBackground(
+    width: number,
+    height: number,
+  ): Promise<Buffer> {
     // 부드러운 그라데이션 배경 (연한 파스텔 톤)
     const svg = `
       <svg width="${width}" height="${height}">
@@ -393,7 +433,7 @@ export class SharpComposer implements IImageComposer {
         <rect width="${width}" height="${height}" fill="url(#grad1)"/>
       </svg>
     `;
-    
+
     return Buffer.from(svg);
   }
 
@@ -407,7 +447,7 @@ export class SharpComposer implements IImageComposer {
   ): Promise<Buffer> {
     // 이미지 리사이즈
     const resized = await sharp(imageBuffer)
-      .resize(size, size, { fit: 'cover' })
+      .resize(size, size, { fit: "cover" })
       .toBuffer();
 
     // 라운드 마스크 SVG 생성
@@ -434,11 +474,11 @@ export class SharpComposer implements IImageComposer {
       .composite([
         {
           input: resized,
-          blend: 'over',
+          blend: "over",
         },
         {
           input: mask,
-          blend: 'dest-in',
+          blend: "dest-in",
         },
       ])
       .png()
@@ -450,13 +490,16 @@ export class SharpComposer implements IImageComposer {
   /**
    * 헤더 카드 생성 (상품 정보)
    */
-  private async createHeaderCard(productInfo: any, canvasWidth: number): Promise<Buffer> {
+  private async createHeaderCard(
+    productInfo: any,
+    canvasWidth: number,
+  ): Promise<Buffer> {
     const cardWidth = canvasWidth - 40;
     const cardHeight = 140;
     const priceText = `₩${productInfo.price.toLocaleString()}`;
     const sizeColorText = [productInfo.size, productInfo.color]
       .filter(Boolean)
-      .join(' · ');
+      .join(" · ");
 
     const svg = `
       <svg width="${cardWidth}" height="${cardHeight}">
@@ -511,11 +554,15 @@ export class SharpComposer implements IImageComposer {
         </text>
         
         <!-- 사이즈/색상 -->
-        ${sizeColorText ? `
+        ${
+          sizeColorText
+            ? `
         <text x="${cardWidth / 2}" y="125" text-anchor="middle" class="card-info">
           ${this.escapeXml(sizeColorText)}
         </text>
-        ` : ''}
+        `
+            : ""
+        }
       </svg>
     `;
 
@@ -529,16 +576,16 @@ export class SharpComposer implements IImageComposer {
     description: string,
     canvasWidth: number,
   ): Promise<Buffer> {
-    if (!description || description.trim() === '') {
+    if (!description || description.trim() === "") {
       // 설명이 없으면 빈 버퍼 반환
-      return Buffer.from('');
+      return Buffer.from("");
     }
 
     const cardWidth = canvasWidth - 80;
     const maxCharsPerLine = 28; // 한 줄에 표시할 최대 글자 수
     const lineHeight = 32;
     const padding = 30;
-    
+
     // 텍스트를 줄바꿈 처리
     const lines = this.wrapText(description, maxCharsPerLine);
     const cardHeight = Math.min(lines.length * lineHeight + padding * 2, 200); // 최대 높이 제한
@@ -584,7 +631,7 @@ export class SharpComposer implements IImageComposer {
           </text>
         `,
           )
-          .join('')}
+          .join("")}
       </svg>
     `;
 
@@ -596,21 +643,21 @@ export class SharpComposer implements IImageComposer {
    */
   private wrapText(text: string, maxCharsPerLine: number): string[] {
     const lines: string[] = [];
-    let currentLine = '';
-    
+    let currentLine = "";
+
     // 먼저 줄바꿈 문자로 분리
     const paragraphs = text.split(/\n/);
-    
+
     for (const paragraph of paragraphs) {
-      const words = paragraph.split(' ');
-      
+      const words = paragraph.split(" ");
+
       for (const word of words) {
         // 한글/영문 혼합 고려 (한글은 2바이트로 계산)
         const wordLength = this.getTextLength(word);
         const currentLength = this.getTextLength(currentLine);
-        
+
         if (currentLength + wordLength + 1 <= maxCharsPerLine) {
-          currentLine += (currentLine ? ' ' : '') + word;
+          currentLine += (currentLine ? " " : "") + word;
         } else {
           if (currentLine) {
             lines.push(currentLine);
@@ -618,13 +665,13 @@ export class SharpComposer implements IImageComposer {
           currentLine = word;
         }
       }
-      
+
       if (currentLine) {
         lines.push(currentLine);
-        currentLine = '';
+        currentLine = "";
       }
     }
-    
+
     return lines;
   }
 
@@ -700,10 +747,10 @@ export class SharpComposer implements IImageComposer {
    */
   private escapeXml(text: string): string {
     return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
   }
 }

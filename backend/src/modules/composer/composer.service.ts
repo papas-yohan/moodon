@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
-import { ImageComposerService } from './image-composer.service';
-import { CreateComposeJobDto } from './dto';
-import { ComposeJob } from './entities/compose-job.entity';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from "@nestjs/common";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import { ImageComposerService } from "./image-composer.service";
+import { CreateComposeJobDto } from "./dto";
+import { ComposeJob } from "./entities/compose-job.entity";
 
 @Injectable()
 export class ComposerService {
@@ -20,25 +25,25 @@ export class ComposerService {
         where: { id: createDto.productId },
         include: {
           images: {
-            orderBy: { sequence: 'asc' },
+            orderBy: { sequence: "asc" },
           },
         },
       });
 
       if (!product) {
-        throw new NotFoundException('상품을 찾을 수 없습니다.');
+        throw new NotFoundException("상품을 찾을 수 없습니다.");
       }
 
       if (product.images.length === 0) {
-        throw new BadRequestException('합성할 이미지가 없습니다.');
+        throw new BadRequestException("합성할 이미지가 없습니다.");
       }
 
       // 합성 작업 생성
       const composeJob = await this.prisma.composeJob.create({
         data: {
           productId: createDto.productId,
-          templateType: createDto.templateType || 'grid',
-          status: 'PENDING',
+          templateType: createDto.templateType || "grid",
+          status: "PENDING",
         },
       });
 
@@ -49,20 +54,23 @@ export class ComposerService {
 
       return composeJob as ComposeJob;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      throw new BadRequestException('합성 작업 생성에 실패했습니다.');
+      throw new BadRequestException("합성 작업 생성에 실패했습니다.");
     }
   }
 
   async findAll(productId?: string) {
     try {
       const where = productId ? { productId } : {};
-      
+
       const jobs = await this.prisma.composeJob.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: {
           product: {
             select: {
@@ -75,7 +83,7 @@ export class ComposerService {
 
       return jobs;
     } catch (error) {
-      throw new BadRequestException('합성 작업 목록 조회에 실패했습니다.');
+      throw new BadRequestException("합성 작업 목록 조회에 실패했습니다.");
     }
   }
 
@@ -94,7 +102,7 @@ export class ComposerService {
       });
 
       if (!job) {
-        throw new NotFoundException('합성 작업을 찾을 수 없습니다.');
+        throw new NotFoundException("합성 작업을 찾을 수 없습니다.");
       }
 
       return job as ComposeJob;
@@ -102,7 +110,7 @@ export class ComposerService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException('합성 작업 조회에 실패했습니다.');
+      throw new BadRequestException("합성 작업 조회에 실패했습니다.");
     }
   }
 
@@ -110,19 +118,19 @@ export class ComposerService {
     try {
       const job = await this.findOne(id);
 
-      if (job.status === 'PROCESSING') {
-        throw new BadRequestException('이미 처리 중인 작업입니다.');
+      if (job.status === "PROCESSING") {
+        throw new BadRequestException("이미 처리 중인 작업입니다.");
       }
 
       if (job.retryCount >= 3) {
-        throw new BadRequestException('최대 재시도 횟수를 초과했습니다.');
+        throw new BadRequestException("최대 재시도 횟수를 초과했습니다.");
       }
 
       // 재시도 카운트 증가 및 상태 초기화
       const updatedJob = await this.prisma.composeJob.update({
         where: { id },
         data: {
-          status: 'PENDING',
+          status: "PENDING",
           retryCount: { increment: 1 },
           errorMessage: null,
           startedAt: null,
@@ -137,10 +145,13 @@ export class ComposerService {
 
       return updatedJob as ComposeJob;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      throw new BadRequestException('합성 작업 재시도에 실패했습니다.');
+      throw new BadRequestException("합성 작업 재시도에 실패했습니다.");
     }
   }
 
@@ -152,7 +163,7 @@ export class ComposerService {
       await this.prisma.composeJob.update({
         where: { id: jobId },
         data: {
-          status: 'PROCESSING',
+          status: "PROCESSING",
           startedAt: new Date(),
         },
       });
@@ -164,7 +175,7 @@ export class ComposerService {
           product: {
             include: {
               images: {
-                orderBy: { sequence: 'asc' },
+                orderBy: { sequence: "asc" },
               },
             },
           },
@@ -172,7 +183,7 @@ export class ComposerService {
       });
 
       if (!job || !job.product) {
-        throw new Error('Job or product not found');
+        throw new Error("Job or product not found");
       }
 
       // 이미지 합성 실행
@@ -182,7 +193,7 @@ export class ComposerService {
       }));
 
       const resultUrl = await this.imageComposer.composeImages(imageInputs, {
-        templateType: job.templateType as 'grid' | 'highlight' | 'simple',
+        templateType: job.templateType as "grid" | "highlight" | "simple",
         productInfo: {
           name: job.product.name,
           description: job.product.description,
@@ -197,7 +208,7 @@ export class ComposerService {
       await this.prisma.composeJob.update({
         where: { id: jobId },
         data: {
-          status: 'COMPLETED',
+          status: "COMPLETED",
           resultUrl,
           completedAt: new Date(),
         },
@@ -208,7 +219,7 @@ export class ComposerService {
         where: { id: job.productId },
         data: {
           composedImageUrl: resultUrl,
-          status: 'READY',
+          status: "READY",
         },
       });
 
@@ -220,7 +231,7 @@ export class ComposerService {
       await this.prisma.composeJob.update({
         where: { id: jobId },
         data: {
-          status: 'FAILED',
+          status: "FAILED",
           errorMessage: error.message,
           completedAt: new Date(),
         },
@@ -230,13 +241,15 @@ export class ComposerService {
 
   async getJobStats() {
     try {
-      const [total, pending, processing, completed, failed] = await Promise.all([
-        this.prisma.composeJob.count(),
-        this.prisma.composeJob.count({ where: { status: 'PENDING' } }),
-        this.prisma.composeJob.count({ where: { status: 'PROCESSING' } }),
-        this.prisma.composeJob.count({ where: { status: 'COMPLETED' } }),
-        this.prisma.composeJob.count({ where: { status: 'FAILED' } }),
-      ]);
+      const [total, pending, processing, completed, failed] = await Promise.all(
+        [
+          this.prisma.composeJob.count(),
+          this.prisma.composeJob.count({ where: { status: "PENDING" } }),
+          this.prisma.composeJob.count({ where: { status: "PROCESSING" } }),
+          this.prisma.composeJob.count({ where: { status: "COMPLETED" } }),
+          this.prisma.composeJob.count({ where: { status: "FAILED" } }),
+        ],
+      );
 
       return {
         total,
@@ -246,7 +259,7 @@ export class ComposerService {
         failed,
       };
     } catch (error) {
-      throw new BadRequestException('합성 작업 통계 조회에 실패했습니다.');
+      throw new BadRequestException("합성 작업 통계 조회에 실패했습니다.");
     }
   }
 }

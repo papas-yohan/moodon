@@ -1,10 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsInt, Min, Max } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsOptional, IsInt, Min, Max } from "class-validator";
+import { Transform } from "class-transformer";
 
 export class UploadImageDto {
   @ApiProperty({
-    description: '이미지 순서',
+    description: "이미지 순서",
     example: 1,
     required: false,
   })
@@ -16,7 +16,7 @@ export class UploadImageDto {
   sequence?: number;
 
   @ApiProperty({
-    description: '이미지 리사이즈 너비',
+    description: "이미지 리사이즈 너비",
     example: 800,
     required: false,
   })
@@ -28,7 +28,7 @@ export class UploadImageDto {
   width?: number;
 
   @ApiProperty({
-    description: '이미지 리사이즈 높이',
+    description: "이미지 리사이즈 높이",
     example: 800,
     required: false,
   })
@@ -40,7 +40,7 @@ export class UploadImageDto {
   height?: number;
 
   @ApiProperty({
-    description: '이미지 품질 (1-100)',
+    description: "이미지 품질 (1-100)",
     example: 80,
     required: false,
   })

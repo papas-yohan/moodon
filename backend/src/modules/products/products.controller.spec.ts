@@ -1,9 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsController } from './products.controller';
-import { ProductsService } from './products.service';
-import { CreateProductDto, UpdateProductDto, QueryProductDto, UploadImageDto } from './dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ProductsController } from "./products.controller";
+import { ProductsService } from "./products.service";
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  QueryProductDto,
+  UploadImageDto,
+} from "./dto";
 
-describe('ProductsController', () => {
+describe("ProductsController", () => {
   let controller: ProductsController;
   let service: ProductsService;
 
@@ -40,19 +45,19 @@ describe('ProductsController', () => {
     jest.clearAllMocks();
   });
 
-  describe('create', () => {
-    it('상품을 생성하고 결과를 반환해야 함', async () => {
+  describe("create", () => {
+    it("상품을 생성하고 결과를 반환해야 함", async () => {
       // Arrange
       const createDto: CreateProductDto = {
-        name: '봄 원피스',
+        name: "봄 원피스",
         price: 45000,
-        size: 'Free',
-        color: '베이지',
+        size: "Free",
+        color: "베이지",
       };
       const expectedResult = {
-        id: 'uuid-1',
+        id: "uuid-1",
         ...createDto,
-        status: 'DRAFT',
+        status: "DRAFT",
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -68,18 +73,18 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('쿼리 파라미터로 상품 목록을 조회해야 함', async () => {
+  describe("findAll", () => {
+    it("쿼리 파라미터로 상품 목록을 조회해야 함", async () => {
       // Arrange
       const queryDto: QueryProductDto = {
         page: 1,
         limit: 10,
-        search: '원피스',
+        search: "원피스",
       };
       const expectedResult = {
         data: [
-          { id: '1', name: '봄 원피스', price: 45000 },
-          { id: '2', name: '여름 원피스', price: 35000 },
+          { id: "1", name: "봄 원피스", price: 45000 },
+          { id: "2", name: "여름 원피스", price: 35000 },
         ],
         meta: {
           total: 2,
@@ -100,15 +105,15 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('findOne', () => {
-    it('ID로 상품을 조회해야 함', async () => {
+  describe("findOne", () => {
+    it("ID로 상품을 조회해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
+      const productId = "uuid-1";
       const expectedResult = {
         id: productId,
-        name: '봄 원피스',
+        name: "봄 원피스",
         price: 45000,
-        status: 'DRAFT',
+        status: "DRAFT",
       };
 
       mockProductsService.findOne.mockResolvedValue(expectedResult);
@@ -122,18 +127,18 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('update', () => {
-    it('상품을 수정하고 결과를 반환해야 함', async () => {
+  describe("update", () => {
+    it("상품을 수정하고 결과를 반환해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
+      const productId = "uuid-1";
       const updateDto: UpdateProductDto = {
-        name: '수정된 상품명',
+        name: "수정된 상품명",
         price: 50000,
       };
       const expectedResult = {
         id: productId,
         ...updateDto,
-        status: 'DRAFT',
+        status: "DRAFT",
         updatedAt: new Date(),
       };
 
@@ -148,10 +153,10 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('remove', () => {
-    it('상품을 삭제해야 함', async () => {
+  describe("remove", () => {
+    it("상품을 삭제해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
+      const productId = "uuid-1";
       mockProductsService.remove.mockResolvedValue(undefined);
 
       // Act
@@ -162,8 +167,8 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('getStats', () => {
-    it('상품 통계를 반환해야 함', async () => {
+  describe("getStats", () => {
+    it("상품 통계를 반환해야 함", async () => {
       // Arrange
       const expectedStats = {
         total: 10,
@@ -183,23 +188,23 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('uploadImage', () => {
-    it('이미지를 업로드하고 결과를 반환해야 함', async () => {
+  describe("uploadImage", () => {
+    it("이미지를 업로드하고 결과를 반환해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
+      const productId = "uuid-1";
       const file = {
-        originalname: 'test.jpg',
-        mimetype: 'image/jpeg',
-        buffer: Buffer.from('test'),
+        originalname: "test.jpg",
+        mimetype: "image/jpeg",
+        buffer: Buffer.from("test"),
         size: 1000,
       } as Express.Multer.File;
       const uploadDto: UploadImageDto = { sequence: 1 };
       const expectedResult = {
-        id: 'img-1',
-        imageUrl: 'http://localhost:3000/uploads/products/test.jpg',
+        id: "img-1",
+        imageUrl: "http://localhost:3000/uploads/products/test.jpg",
         sequence: 1,
         size: 1000,
-        mimeType: 'image/jpeg',
+        mimeType: "image/jpeg",
         createdAt: new Date(),
       };
 
@@ -210,75 +215,89 @@ describe('ProductsController', () => {
 
       // Assert
       expect(result).toEqual(expectedResult);
-      expect(service.uploadImage).toHaveBeenCalledWith(productId, file, uploadDto);
+      expect(service.uploadImage).toHaveBeenCalledWith(
+        productId,
+        file,
+        uploadDto,
+      );
     });
   });
 
-  describe('uploadMultipleImages', () => {
-    it('다중 이미지를 업로드하고 결과를 반환해야 함', async () => {
+  describe("uploadMultipleImages", () => {
+    it("다중 이미지를 업로드하고 결과를 반환해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
+      const productId = "uuid-1";
       const files = [
         {
-          originalname: 'test1.jpg',
-          mimetype: 'image/jpeg',
-          buffer: Buffer.from('test1'),
+          originalname: "test1.jpg",
+          mimetype: "image/jpeg",
+          buffer: Buffer.from("test1"),
           size: 1000,
         },
         {
-          originalname: 'test2.jpg',
-          mimetype: 'image/jpeg',
-          buffer: Buffer.from('test2'),
+          originalname: "test2.jpg",
+          mimetype: "image/jpeg",
+          buffer: Buffer.from("test2"),
           size: 1000,
         },
       ] as Express.Multer.File[];
       const uploadDto: UploadImageDto = {};
       const expectedResult = [
         {
-          id: 'img-1',
-          imageUrl: 'http://localhost:3000/uploads/products/test1.jpg',
+          id: "img-1",
+          imageUrl: "http://localhost:3000/uploads/products/test1.jpg",
           sequence: 1,
           size: 1000,
-          mimeType: 'image/jpeg',
+          mimeType: "image/jpeg",
           createdAt: new Date(),
         },
         {
-          id: 'img-2',
-          imageUrl: 'http://localhost:3000/uploads/products/test2.jpg',
+          id: "img-2",
+          imageUrl: "http://localhost:3000/uploads/products/test2.jpg",
           sequence: 2,
           size: 1000,
-          mimeType: 'image/jpeg',
+          mimeType: "image/jpeg",
           createdAt: new Date(),
         },
       ];
 
-      mockProductsService.uploadMultipleImages.mockResolvedValue(expectedResult);
+      mockProductsService.uploadMultipleImages.mockResolvedValue(
+        expectedResult,
+      );
 
       // Act
-      const result = await controller.uploadMultipleImages(productId, files, uploadDto);
+      const result = await controller.uploadMultipleImages(
+        productId,
+        files,
+        uploadDto,
+      );
 
       // Assert
       expect(result).toEqual(expectedResult);
-      expect(service.uploadMultipleImages).toHaveBeenCalledWith(productId, files, uploadDto);
+      expect(service.uploadMultipleImages).toHaveBeenCalledWith(
+        productId,
+        files,
+        uploadDto,
+      );
     });
   });
 
-  describe('getImages', () => {
-    it('상품의 이미지 목록을 반환해야 함', async () => {
+  describe("getImages", () => {
+    it("상품의 이미지 목록을 반환해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
+      const productId = "uuid-1";
       const expectedResult = [
         {
-          id: 'img-1',
+          id: "img-1",
           productId,
-          imageUrl: 'http://localhost:3000/uploads/products/test1.jpg',
+          imageUrl: "http://localhost:3000/uploads/products/test1.jpg",
           sequence: 1,
           createdAt: new Date(),
         },
         {
-          id: 'img-2',
+          id: "img-2",
           productId,
-          imageUrl: 'http://localhost:3000/uploads/products/test2.jpg',
+          imageUrl: "http://localhost:3000/uploads/products/test2.jpg",
           sequence: 2,
           createdAt: new Date(),
         },
@@ -295,12 +314,12 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('deleteImage', () => {
-    it('이미지를 삭제해야 함', async () => {
+  describe("deleteImage", () => {
+    it("이미지를 삭제해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
-      const imageId = 'img-1';
-      const expectedResult = { message: '이미지가 삭제되었습니다.' };
+      const productId = "uuid-1";
+      const imageId = "img-1";
+      const expectedResult = { message: "이미지가 삭제되었습니다." };
 
       mockProductsService.deleteImage.mockResolvedValue(expectedResult);
 
@@ -313,12 +332,12 @@ describe('ProductsController', () => {
     });
   });
 
-  describe('reorderImages', () => {
-    it('이미지 순서를 변경해야 함', async () => {
+  describe("reorderImages", () => {
+    it("이미지 순서를 변경해야 함", async () => {
       // Arrange
-      const productId = 'uuid-1';
-      const imageIds = ['img-2', 'img-1'];
-      const expectedResult = { message: '이미지 순서가 변경되었습니다.' };
+      const productId = "uuid-1";
+      const imageIds = ["img-2", "img-1"];
+      const expectedResult = { message: "이미지 순서가 변경되었습니다." };
 
       mockProductsService.reorderImages.mockResolvedValue(expectedResult);
 

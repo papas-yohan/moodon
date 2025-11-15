@@ -1,4 +1,4 @@
-import { Product } from '@prisma/client';
+import { Product } from "@prisma/client";
 
 export interface MessageTemplate {
   sms: string;
@@ -11,12 +11,16 @@ export class MessageTemplateService {
   /**
    * 상품 정보를 기반으로 메시지 템플릿 생성
    */
-  static createProductMessage(product: Product, trackingUrl: string): MessageTemplate {
+  static createProductMessage(
+    product: Product,
+    trackingUrl: string,
+  ): MessageTemplate {
     const baseInfo = `${product.name}\n💰 ${product.price.toLocaleString()}원`;
-    const sizeColor = product.size || product.color 
-      ? `\n📏 ${product.size || ''} ${product.color || ''}`.trim()
-      : '';
-    
+    const sizeColor =
+      product.size || product.color
+        ? `\n📏 ${product.size || ""} ${product.color || ""}`.trim()
+        : "";
+
     return {
       // SMS (90바이트 제한)
       sms: `🎉신상품!\n${product.name}\n${product.price.toLocaleString()}원\n👉${trackingUrl}`,
@@ -56,17 +60,23 @@ ${baseInfo}${sizeColor}
   /**
    * 다중 상품용 메시지 템플릿
    */
-  static createMultiProductMessage(products: Product[], trackingUrl: string): MessageTemplate {
+  static createMultiProductMessage(
+    products: Product[],
+    trackingUrl: string,
+  ): MessageTemplate {
     const productCount = products.length;
     const firstProduct = products[0];
-    
+
     return {
       sms: `🎉신상품 ${productCount}개!\n${firstProduct.name} 외\n👉${trackingUrl}`,
 
       lms: `🎉 신상품 ${productCount}개 입고!
 
-${products.slice(0, 3).map(p => `• ${p.name} ${p.price.toLocaleString()}원`).join('\n')}
-${productCount > 3 ? `외 ${productCount - 3}개 더...` : ''}
+${products
+  .slice(0, 3)
+  .map((p) => `• ${p.name} ${p.price.toLocaleString()}원`)
+  .join("\n")}
+${productCount > 3 ? `외 ${productCount - 3}개 더...` : ""}
 
 👉 전체보기: ${trackingUrl}
 
@@ -74,15 +84,21 @@ ${productCount > 3 ? `외 ${productCount - 3}개 더...` : ''}
 
       kakaoAlimtalk: `신상품 ${productCount}개가 입고되었습니다.
 
-${products.slice(0, 2).map(p => `• ${p.name}`).join('\n')}
-${productCount > 2 ? `외 ${productCount - 2}개` : ''}
+${products
+  .slice(0, 2)
+  .map((p) => `• ${p.name}`)
+  .join("\n")}
+${productCount > 2 ? `외 ${productCount - 2}개` : ""}
 
 지금 바로 확인해보세요!`,
 
       kakaoFriendtalk: `🛍️ 대박! 신상품 ${productCount}개 동시 입고!
 
-${products.slice(0, 3).map(p => `✨ ${p.name} - ${p.price.toLocaleString()}원`).join('\n')}
-${productCount > 3 ? `\n🎁 그리고 ${productCount - 3}개 더!` : ''}
+${products
+  .slice(0, 3)
+  .map((p) => `✨ ${p.name} - ${p.price.toLocaleString()}원`)
+  .join("\n")}
+${productCount > 3 ? `\n🎁 그리고 ${productCount - 3}개 더!` : ""}
 
 💝 지금 주문하면 특별 혜택까지! 
 놓치면 후회하는 기회예요~ 🏃‍♀️💨`,
@@ -98,17 +114,18 @@ ${productCount > 3 ? `\n🎁 그리고 ${productCount - 3}개 더!` : ''}
     }
 
     // 줄바꿈 기준으로 자르기
-    const lines = text.split('\n');
-    let result = '';
-    
+    const lines = text.split("\n");
+    let result = "";
+
     for (const line of lines) {
-      if ((result + line + '\n').length > maxLength - 10) { // 여유분 10자
-        result += '...';
+      if ((result + line + "\n").length > maxLength - 10) {
+        // 여유분 10자
+        result += "...";
         break;
       }
-      result += line + '\n';
+      result += line + "\n";
     }
-    
+
     return result.trim();
   }
 
@@ -125,14 +142,14 @@ ${productCount > 3 ? `\n🎁 그리고 ${productCount - 3}개 더!` : ''}
   static createKakaoButtons(trackingUrl: string, productName: string) {
     return [
       {
-        buttonType: 'WL',
-        buttonName: '바로주문하기',
+        buttonType: "WL",
+        buttonName: "바로주문하기",
         linkMo: trackingUrl,
         linkPc: trackingUrl,
       },
       {
-        buttonType: 'WL', 
-        buttonName: '상품상세보기',
+        buttonType: "WL",
+        buttonName: "상품상세보기",
         linkMo: trackingUrl,
         linkPc: trackingUrl,
       },
@@ -144,36 +161,39 @@ ${productCount > 3 ? `\n🎁 그리고 ${productCount - 3}개 더!` : ''}
    */
   static getTimeBasedGreeting(): string {
     const hour = new Date().getHours();
-    
-    if (hour < 12) return '좋은 아침이에요! ☀️';
-    if (hour < 18) return '안녕하세요! 😊';
-    return '좋은 저녁이에요! 🌙';
+
+    if (hour < 12) return "좋은 아침이에요! ☀️";
+    if (hour < 18) return "안녕하세요! 😊";
+    return "좋은 저녁이에요! 🌙";
   }
 
   /**
    * 이모지 추가 (선택적)
    */
-  static addEmojis(text: string, style: 'minimal' | 'friendly' | 'excited' = 'friendly'): string {
+  static addEmojis(
+    text: string,
+    style: "minimal" | "friendly" | "excited" = "friendly",
+  ): string {
     const emojiSets = {
       minimal: {
-        product: '•',
-        price: '',
-        action: '→',
+        product: "•",
+        price: "",
+        action: "→",
       },
       friendly: {
-        product: '✨',
-        price: '💰',
-        action: '👉',
+        product: "✨",
+        price: "💰",
+        action: "👉",
       },
       excited: {
-        product: '🎉',
-        price: '💸',
-        action: '🔥',
+        product: "🎉",
+        price: "💸",
+        action: "🔥",
       },
     };
 
     const emojis = emojiSets[style];
-    
+
     return text
       .replace(/•/g, emojis.product)
       .replace(/원/g, `원${emojis.price}`)

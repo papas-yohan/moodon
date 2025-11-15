@@ -1,9 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
-import { MessageTemplateService, ProductInfo, ContactInfo } from './message-template.service';
-import { SolapiAdapter } from './adapters/solapi.adapter';
-import { CreateSendJobDto, QuerySendJobDto } from './dto';
-import { SendJob, SendLog } from './entities';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from "@nestjs/common";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import {
+  MessageTemplateService,
+  ProductInfo,
+  ContactInfo,
+} from "./message-template.service";
+import { SolapiAdapter } from "./adapters/solapi.adapter";
+import { CreateSendJobDto, QuerySendJobDto } from "./dto";
+import { SendJob, SendLog } from "./entities";
 
 @Injectable()
 export class MessagingService {
@@ -20,23 +29,23 @@ export class MessagingService {
       // 상품 존재 확인
       const products = await this.prisma.product.findMany({
         where: { id: { in: createDto.productIds } },
-        include: { images: { take: 1, orderBy: { sequence: 'asc' } } },
+        include: { images: { take: 1, orderBy: { sequence: "asc" } } },
       });
 
       if (products.length !== createDto.productIds.length) {
-        throw new BadRequestException('일부 상품을 찾을 수 없습니다.');
+        throw new BadRequestException("일부 상품을 찾을 수 없습니다.");
       }
 
       // 연락처 존재 확인
       const contacts = await this.prisma.contact.findMany({
-        where: { 
+        where: {
           id: { in: createDto.contactIds },
           isActive: true,
         },
       });
 
       if (contacts.length === 0) {
-        throw new BadRequestException('활성화된 연락처가 없습니다.');
+        throw new BadRequestException("활성화된 연락처가 없습니다.");
       }
 
       // 발송 작업 생성
@@ -45,25 +54,27 @@ export class MessagingService {
           productIds: JSON.stringify(createDto.productIds),
           channel: createDto.channel,
           recipientCount: contacts.length,
-          status: 'PENDING',
-          scheduledAt: createDto.scheduledAt ? new Date(createDto.scheduledAt) : null,
+          status: "PENDING",
+          scheduledAt: createDto.scheduledAt
+            ? new Date(createDto.scheduledAt)
+            : null,
         },
       });
 
       // 발송 로그 생성 (각 연락처별, 채널별)
       const sendLogs = [];
-      
+
       for (const contact of contacts) {
         for (const product of products) {
           const channels = this.getChannelsToSend(createDto.channel, contact);
-          
+
           for (const channel of channels) {
             sendLogs.push({
               sendJobId: sendJob.id,
               productId: product.id,
               contactId: contact.id,
               channel,
-              status: 'PENDING',
+              status: "PENDING",
             });
           }
         }
@@ -74,10 +85,15 @@ export class MessagingService {
       });
 
       // 비동기로 발송 처리 시작
-      if (!createDto.scheduledAt || new Date(createDto.scheduledAt) <= new Date()) {
-        this.processSendJob(sendJob.id, createDto.customMessage).catch((error) => {
-          this.logger.error(`Send job ${sendJob.id} failed`, error);
-        });
+      if (
+        !createDto.scheduledAt ||
+        new Date(createDto.scheduledAt) <= new Date()
+      ) {
+        this.processSendJob(sendJob.id, createDto.customMessage).catch(
+          (error) => {
+            this.logger.error(`Send job ${sendJob.id} failed`, error);
+          },
+        );
       }
 
       return sendJob as SendJob;
@@ -85,21 +101,27 @@ export class MessagingService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException('발송 작업 생성에 실패했습니다.');
+      throw new BadRequestException("발송 작업 생성에 실패했습니다.");
     }
   }
 
   async findAll(queryDto: QuerySendJobDto) {
-    const { page = 1, limit = 20, status, channel, sort = 'createdAt:desc' } = queryDto;
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      channel,
+      sort = "createdAt:desc",
+    } = queryDto;
     const skip = (page - 1) * limit;
 
     // 정렬 파싱
-    const [sortField, sortOrder] = sort.split(':');
-    const orderBy = { [sortField]: sortOrder || 'desc' };
+    const [sortField, sortOrder] = sort.split(":");
+    const orderBy = { [sortField]: sortOrder || "desc" };
 
     // 검색 조건 구성
     const where: any = {};
-    
+
     if (status) {
       where.status = status;
     }
@@ -129,7 +151,7 @@ export class MessagingService {
         },
       };
     } catch (error) {
-      throw new BadRequestException('발송 작업 목록 조회에 실패했습니다.');
+      throw new BadRequestException("발송 작업 목록 조회에 실패했습니다.");
     }
   }
 
@@ -140,7 +162,7 @@ export class MessagingService {
       });
 
       if (!sendJob) {
-        throw new NotFoundException('발송 작업을 찾을 수 없습니다.');
+        throw new NotFoundException("발송 작업을 찾을 수 없습니다.");
       }
 
       return sendJob as SendJob;
@@ -148,7 +170,7 @@ export class MessagingService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException('발송 작업 조회에 실패했습니다.');
+      throw new BadRequestException("발송 작업 조회에 실패했습니다.");
     }
   }
 
@@ -161,7 +183,7 @@ export class MessagingService {
           where: { sendJobId },
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
           include: {
             product: {
               select: { id: true, name: true },
@@ -184,25 +206,32 @@ export class MessagingService {
         },
       };
     } catch (error) {
-      throw new BadRequestException('발송 로그 조회에 실패했습니다.');
+      throw new BadRequestException("발송 로그 조회에 실패했습니다.");
     }
   }
 
   async getStats() {
     try {
-      const [totalJobs, pendingJobs, processingJobs, completedJobs, failedJobs] = await Promise.all([
+      const [
+        totalJobs,
+        pendingJobs,
+        processingJobs,
+        completedJobs,
+        failedJobs,
+      ] = await Promise.all([
         this.prisma.sendJob.count(),
-        this.prisma.sendJob.count({ where: { status: 'PENDING' } }),
-        this.prisma.sendJob.count({ where: { status: 'PROCESSING' } }),
-        this.prisma.sendJob.count({ where: { status: 'COMPLETED' } }),
-        this.prisma.sendJob.count({ where: { status: 'FAILED' } }),
+        this.prisma.sendJob.count({ where: { status: "PENDING" } }),
+        this.prisma.sendJob.count({ where: { status: "PROCESSING" } }),
+        this.prisma.sendJob.count({ where: { status: "COMPLETED" } }),
+        this.prisma.sendJob.count({ where: { status: "FAILED" } }),
       ]);
 
-      const [totalMessages, successMessages, failedMessages] = await Promise.all([
-        this.prisma.sendLog.count(),
-        this.prisma.sendLog.count({ where: { status: 'SUCCESS' } }),
-        this.prisma.sendLog.count({ where: { status: 'FAILED' } }),
-      ]);
+      const [totalMessages, successMessages, failedMessages] =
+        await Promise.all([
+          this.prisma.sendLog.count(),
+          this.prisma.sendLog.count({ where: { status: "SUCCESS" } }),
+          this.prisma.sendLog.count({ where: { status: "FAILED" } }),
+        ]);
 
       return {
         jobs: {
@@ -216,15 +245,21 @@ export class MessagingService {
           total: totalMessages,
           success: successMessages,
           failed: failedMessages,
-          successRate: totalMessages > 0 ? (successMessages / totalMessages * 100).toFixed(2) : '0.00',
+          successRate:
+            totalMessages > 0
+              ? ((successMessages / totalMessages) * 100).toFixed(2)
+              : "0.00",
         },
       };
     } catch (error) {
-      throw new BadRequestException('발송 통계 조회에 실패했습니다.');
+      throw new BadRequestException("발송 통계 조회에 실패했습니다.");
     }
   }
 
-  private async processSendJob(sendJobId: string, customMessage?: string): Promise<void> {
+  private async processSendJob(
+    sendJobId: string,
+    customMessage?: string,
+  ): Promise<void> {
     try {
       this.logger.log(`Processing send job: ${sendJobId}`);
 
@@ -232,16 +267,16 @@ export class MessagingService {
       await this.prisma.sendJob.update({
         where: { id: sendJobId },
         data: {
-          status: 'PROCESSING',
+          status: "PROCESSING",
           startedAt: new Date(),
         },
       });
 
       // 발송 로그 조회
       const sendLogs = await this.prisma.sendLog.findMany({
-        where: { 
+        where: {
           sendJobId,
-          status: 'PENDING',
+          status: "PENDING",
         },
         include: {
           product: true,
@@ -253,7 +288,7 @@ export class MessagingService {
         await this.prisma.sendJob.update({
           where: { id: sendJobId },
           data: {
-            status: 'COMPLETED',
+            status: "COMPLETED",
             completedAt: new Date(),
           },
         });
@@ -262,7 +297,7 @@ export class MessagingService {
 
       // 상품별로 그룹화
       const productGroups = this.groupLogsByProduct(sendLogs);
-      
+
       let successCount = 0;
       let failCount = 0;
 
@@ -289,10 +324,19 @@ export class MessagingService {
           };
 
           try {
-            await this.sendMessage(log.id, [productInfo], contactInfo, log.channel, customMessage);
+            await this.sendMessage(
+              log.id,
+              [productInfo],
+              contactInfo,
+              log.channel,
+              customMessage,
+            );
             successCount++;
           } catch (error) {
-            this.logger.error(`Failed to send message to ${log.contact.phone}`, error);
+            this.logger.error(
+              `Failed to send message to ${log.contact.phone}`,
+              error,
+            );
             failCount++;
           }
 
@@ -305,21 +349,23 @@ export class MessagingService {
       await this.prisma.sendJob.update({
         where: { id: sendJobId },
         data: {
-          status: successCount > 0 ? 'COMPLETED' : 'FAILED',
+          status: successCount > 0 ? "COMPLETED" : "FAILED",
           successCount,
           failCount,
           completedAt: new Date(),
         },
       });
 
-      this.logger.log(`Send job completed: ${sendJobId}, success: ${successCount}, failed: ${failCount}`);
+      this.logger.log(
+        `Send job completed: ${sendJobId}, success: ${successCount}, failed: ${failCount}`,
+      );
     } catch (error) {
       this.logger.error(`Send job failed: ${sendJobId}`, error);
 
       await this.prisma.sendJob.update({
         where: { id: sendJobId },
         data: {
-          status: 'FAILED',
+          status: "FAILED",
           completedAt: new Date(),
         },
       });
@@ -335,15 +381,19 @@ export class MessagingService {
   ): Promise<void> {
     try {
       // 메시지 템플릿 생성
-      const messageTemplate = this.messageTemplate.generateMessage(products, contact, customMessage);
-      
+      const messageTemplate = this.messageTemplate.generateMessage(
+        products,
+        contact,
+        customMessage,
+      );
+
       // 실제 솔라피 API 호출
       let result;
-      
-      if (channel === 'SMS') {
+
+      if (channel === "SMS") {
         // 합성된 이미지가 있으면 MMS로 발송, 없으면 SMS/LMS
         const composedImageUrl = products[0]?.composedImageUrl;
-        
+
         if (composedImageUrl) {
           // MMS 발송 (이미지 첨부)
           this.logger.log(`Sending MMS with image: ${composedImageUrl}`);
@@ -355,7 +405,7 @@ export class MessagingService {
         } else {
           // 이미지가 없으면 SMS/LMS로 발송
           const textLength = messageTemplate.sms.length;
-          
+
           if (textLength <= 90) {
             // 단문 SMS
             result = await this.solapiAdapter.sendSMS({
@@ -370,40 +420,45 @@ export class MessagingService {
             });
           }
         }
-      } else if (channel === 'KAKAO') {
+      } else if (channel === "KAKAO") {
         // 카카오톡 발송 (알림톡 또는 친구톡)
         result = await this.solapiAdapter.sendKakaoAlimtalk({
           to: contact.phone,
           text: messageTemplate.kakao.message,
-          trackingUrl: messageTemplate.kakao.buttonUrl || products[0]?.marketLink || undefined,
+          trackingUrl:
+            messageTemplate.kakao.buttonUrl ||
+            products[0]?.marketLink ||
+            undefined,
           templateCode: messageTemplate.kakao.templateCode,
         });
       } else {
         throw new Error(`Unsupported channel: ${channel}`);
       }
-      
-      if (result.status === 'success') {
-        this.logger.log(`Message sent successfully to ${contact.phone}: ${result.messageId}`);
-        
+
+      if (result.status === "success") {
+        this.logger.log(
+          `Message sent successfully to ${contact.phone}: ${result.messageId}`,
+        );
+
         await this.prisma.sendLog.update({
           where: { id: logId },
           data: {
-            status: 'SUCCESS',
+            status: "SUCCESS",
             sentAt: new Date(),
             externalMessageId: result.messageId,
           },
         });
       } else {
-        throw new Error(result.errorMessage || 'Message send failed');
+        throw new Error(result.errorMessage || "Message send failed");
       }
     } catch (error) {
       this.logger.error(`Failed to send message to ${contact.phone}:`, error);
-      
+
       await this.prisma.sendLog.update({
         where: { id: logId },
         data: {
-          status: 'FAILED',
-          errorCode: error.code || 'UNKNOWN_ERROR',
+          status: "FAILED",
+          errorCode: error.code || "UNKNOWN_ERROR",
           errorMessage: error.message,
         },
       });
@@ -413,15 +468,18 @@ export class MessagingService {
 
   private getChannelsToSend(requestedChannel: string, contact: any): string[] {
     const channels = [];
-    
-    if (requestedChannel === 'SMS' || requestedChannel === 'BOTH') {
-      channels.push('SMS');
+
+    if (requestedChannel === "SMS" || requestedChannel === "BOTH") {
+      channels.push("SMS");
     }
-    
-    if ((requestedChannel === 'KAKAO' || requestedChannel === 'BOTH') && contact.kakaoId) {
-      channels.push('KAKAO');
+
+    if (
+      (requestedChannel === "KAKAO" || requestedChannel === "BOTH") &&
+      contact.kakaoId
+    ) {
+      channels.push("KAKAO");
     }
-    
+
     return channels;
   }
 
@@ -437,6 +495,6 @@ export class MessagingService {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

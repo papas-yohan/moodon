@@ -1,5 +1,5 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
+import { Injectable, BadRequestException } from "@nestjs/common";
+import { PrismaService } from "../../common/prisma/prisma.service";
 
 export interface ProductAnalytics {
   productId: string;
@@ -55,20 +55,26 @@ export class AnalyticsService {
       // 상품 정보 조회
       const product = await this.prisma.product.findUnique({
         where: { id: productId },
-        select: { id: true, name: true, sendCount: true, readCount: true, clickCount: true },
+        select: {
+          id: true,
+          name: true,
+          sendCount: true,
+          readCount: true,
+          clickCount: true,
+        },
       });
 
       if (!product) {
-        throw new BadRequestException('상품을 찾을 수 없습니다.');
+        throw new BadRequestException("상품을 찾을 수 없습니다.");
       }
 
       // 추적 이벤트 통계
       const [readEvents, clickEvents] = await Promise.all([
         this.prisma.trackingEvent.count({
-          where: { productId, eventType: 'READ' },
+          where: { productId, eventType: "READ" },
         }),
         this.prisma.trackingEvent.count({
-          where: { productId, eventType: 'CLICK' },
+          where: { productId, eventType: "CLICK" },
         }),
       ]);
 
@@ -78,7 +84,8 @@ export class AnalyticsService {
 
       const readRate = totalSent > 0 ? (totalRead / totalSent) * 100 : 0;
       const clickRate = totalSent > 0 ? (totalClicks / totalSent) * 100 : 0;
-      const clickThroughRate = totalRead > 0 ? (totalClicks / totalRead) * 100 : 0;
+      const clickThroughRate =
+        totalRead > 0 ? (totalClicks / totalRead) * 100 : 0;
 
       return {
         productId: product.id,
@@ -94,7 +101,7 @@ export class AnalyticsService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException('상품 분석 데이터 조회에 실패했습니다.');
+      throw new BadRequestException("상품 분석 데이터 조회에 실패했습니다.");
     }
   }
 
@@ -110,20 +117,22 @@ export class AnalyticsService {
       ] = await Promise.all([
         this.prisma.product.count(),
         this.prisma.contact.count({ where: { isActive: true } }),
-        this.prisma.sendLog.count({ where: { status: 'SUCCESS' } }),
-        this.prisma.trackingEvent.count({ where: { eventType: 'READ' } }),
-        this.prisma.trackingEvent.count({ where: { eventType: 'CLICK' } }),
+        this.prisma.sendLog.count({ where: { status: "SUCCESS" } }),
+        this.prisma.trackingEvent.count({ where: { eventType: "READ" } }),
+        this.prisma.trackingEvent.count({ where: { eventType: "CLICK" } }),
       ]);
 
-      const avgReadRate = totalSentLogs > 0 ? (totalReadEvents / totalSentLogs) * 100 : 0;
-      const avgClickRate = totalSentLogs > 0 ? (totalClickEvents / totalSentLogs) * 100 : 0;
+      const avgReadRate =
+        totalSentLogs > 0 ? (totalReadEvents / totalSentLogs) * 100 : 0;
+      const avgClickRate =
+        totalSentLogs > 0 ? (totalClickEvents / totalSentLogs) * 100 : 0;
 
       // 상위 상품 (클릭 수 기준)
       const topProductsData = await this.prisma.trackingEvent.groupBy({
-        by: ['productId'],
-        where: { eventType: 'CLICK' },
+        by: ["productId"],
+        where: { eventType: "CLICK" },
         _count: { id: true },
-        orderBy: { _count: { id: 'desc' } },
+        orderBy: { _count: { id: "desc" } },
         take: 5,
       });
 
@@ -136,7 +145,7 @@ export class AnalyticsService {
       // 최근 이벤트
       const recentEvents = await this.prisma.trackingEvent.findMany({
         take: 10,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: {
           product: { select: { name: true } },
           contact: { select: { name: true, phone: true } },
@@ -164,7 +173,7 @@ export class AnalyticsService {
         dailyStats,
       };
     } catch (error) {
-      throw new BadRequestException('대시보드 통계 조회에 실패했습니다.');
+      throw new BadRequestException("대시보드 통계 조회에 실패했습니다.");
     }
   }
 
@@ -190,27 +199,29 @@ export class AnalyticsService {
       ] = await Promise.all([
         this.prisma.trackingEvent.count({ where: whereClause }),
         this.prisma.trackingEvent.count({
-          where: { ...whereClause, eventType: 'CLICK' },
+          where: { ...whereClause, eventType: "CLICK" },
         }),
         this.prisma.trackingEvent.count({
-          where: { ...whereClause, eventType: 'READ' },
+          where: { ...whereClause, eventType: "READ" },
         }),
         this.prisma.trackingEvent.count({
-          where: { ...whereClause, eventType: 'DELIVERED' },
+          where: { ...whereClause, eventType: "DELIVERED" },
         }),
-        this.prisma.trackingEvent.findMany({
-          where: whereClause,
-          select: { contactId: true },
-          distinct: ['contactId'],
-        }).then(results => results.filter(r => r.contactId).length),
+        this.prisma.trackingEvent
+          .findMany({
+            where: whereClause,
+            select: { contactId: true },
+            distinct: ["contactId"],
+          })
+          .then((results) => results.filter((r) => r.contactId).length),
       ]);
 
       // 상위 상품
       const topProductsData = await this.prisma.trackingEvent.groupBy({
-        by: ['productId'],
+        by: ["productId"],
         where: whereClause,
         _count: { id: true },
-        orderBy: { _count: { id: 'desc' } },
+        orderBy: { _count: { id: "desc" } },
         take: 10,
       });
 
@@ -220,15 +231,15 @@ export class AnalyticsService {
           where: { id: item.productId },
           select: { name: true },
         });
-        
+
         topProducts.push({
           productId: item.productId,
-          productName: product?.name || '알 수 없는 상품',
+          productName: product?.name || "알 수 없는 상품",
           eventCount: item._count.id,
         });
       }
 
-      const period = `${startDate.toISOString().split('T')[0]} ~ ${endDate.toISOString().split('T')[0]}`;
+      const period = `${startDate.toISOString().split("T")[0]} ~ ${endDate.toISOString().split("T")[0]}`;
 
       return {
         period,
@@ -240,7 +251,7 @@ export class AnalyticsService {
         topProducts,
       };
     } catch (error) {
-      throw new BadRequestException('기간별 통계 조회에 실패했습니다.');
+      throw new BadRequestException("기간별 통계 조회에 실패했습니다.");
     }
   }
 
@@ -251,7 +262,7 @@ export class AnalyticsService {
     while (currentDate <= endDate) {
       const dayStart = new Date(currentDate);
       dayStart.setHours(0, 0, 0, 0);
-      
+
       const dayEnd = new Date(currentDate);
       dayEnd.setHours(23, 59, 59, 999);
 
@@ -266,19 +277,19 @@ export class AnalyticsService {
         this.prisma.sendLog.count({
           where: {
             ...whereClause,
-            status: 'SUCCESS',
+            status: "SUCCESS",
           },
         }),
         this.prisma.trackingEvent.count({
-          where: { ...whereClause, eventType: 'READ' },
+          where: { ...whereClause, eventType: "READ" },
         }),
         this.prisma.trackingEvent.count({
-          where: { ...whereClause, eventType: 'CLICK' },
+          where: { ...whereClause, eventType: "CLICK" },
         }),
       ]);
 
       dailyStats.push({
-        date: currentDate.toISOString().split('T')[0],
+        date: currentDate.toISOString().split("T")[0],
         sent,
         read,
         clicks,
@@ -292,11 +303,11 @@ export class AnalyticsService {
 
   async getHourlyStats(date: Date) {
     const hourlyStats = [];
-    
+
     for (let hour = 0; hour < 24; hour++) {
       const hourStart = new Date(date);
       hourStart.setHours(hour, 0, 0, 0);
-      
+
       const hourEnd = new Date(date);
       hourEnd.setHours(hour, 59, 59, 999);
 
@@ -309,10 +320,10 @@ export class AnalyticsService {
 
       const [clicks, reads] = await Promise.all([
         this.prisma.trackingEvent.count({
-          where: { ...whereClause, eventType: 'CLICK' },
+          where: { ...whereClause, eventType: "CLICK" },
         }),
         this.prisma.trackingEvent.count({
-          where: { ...whereClause, eventType: 'READ' },
+          where: { ...whereClause, eventType: "READ" },
         }),
       ]);
 

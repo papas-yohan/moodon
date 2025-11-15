@@ -1,10 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, Min, Max, IsIn, IsDateString } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { ApiProperty } from "@nestjs/swagger";
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+  IsIn,
+  IsDateString,
+} from "class-validator";
+import { Transform } from "class-transformer";
 
 export class QueryTrackingEventDto {
   @ApiProperty({
-    description: '페이지 번호',
+    description: "페이지 번호",
     example: 1,
     required: false,
   })
@@ -15,7 +23,7 @@ export class QueryTrackingEventDto {
   page?: number = 1;
 
   @ApiProperty({
-    description: '페이지당 항목 수',
+    description: "페이지당 항목 수",
     example: 20,
     required: false,
   })
@@ -27,8 +35,8 @@ export class QueryTrackingEventDto {
   limit?: number = 20;
 
   @ApiProperty({
-    description: '상품 ID 필터',
-    example: 'cm3a8ixqy0000uxqhqhqhqhqh',
+    description: "상품 ID 필터",
+    example: "cm3a8ixqy0000uxqhqhqhqhqh",
     required: false,
   })
   @IsOptional()
@@ -36,8 +44,8 @@ export class QueryTrackingEventDto {
   productId?: string;
 
   @ApiProperty({
-    description: '연락처 ID 필터',
-    example: 'cm3a8ixqy0000uxqhqhqhqhqh',
+    description: "연락처 ID 필터",
+    example: "cm3a8ixqy0000uxqhqhqhqhqh",
     required: false,
   })
   @IsOptional()
@@ -45,18 +53,18 @@ export class QueryTrackingEventDto {
   contactId?: string;
 
   @ApiProperty({
-    description: '이벤트 타입 필터',
-    enum: ['CLICK', 'READ', 'DELIVERED'],
-    example: 'CLICK',
+    description: "이벤트 타입 필터",
+    enum: ["CLICK", "READ", "DELIVERED"],
+    example: "CLICK",
     required: false,
   })
   @IsOptional()
-  @IsIn(['CLICK', 'READ', 'DELIVERED'])
+  @IsIn(["CLICK", "READ", "DELIVERED"])
   eventType?: string;
 
   @ApiProperty({
-    description: '시작 날짜',
-    example: '2025-11-01T00:00:00.000Z',
+    description: "시작 날짜",
+    example: "2025-11-01T00:00:00.000Z",
     required: false,
   })
   @IsOptional()
@@ -64,8 +72,8 @@ export class QueryTrackingEventDto {
   startDate?: string;
 
   @ApiProperty({
-    description: '종료 날짜',
-    example: '2025-11-30T23:59:59.999Z',
+    description: "종료 날짜",
+    example: "2025-11-30T23:59:59.999Z",
     required: false,
   })
   @IsOptional()
@@ -73,11 +81,11 @@ export class QueryTrackingEventDto {
   endDate?: string;
 
   @ApiProperty({
-    description: '정렬 (예: createdAt:desc, eventType:asc)',
-    example: 'createdAt:desc',
+    description: "정렬 (예: createdAt:desc, eventType:asc)",
+    example: "createdAt:desc",
     required: false,
   })
   @IsOptional()
   @IsString()
-  sort?: string = 'createdAt:desc';
+  sort?: string = "createdAt:desc";
 }

@@ -1,8 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
-import { FileParserService, ParsedContact } from './file-parser.service';
-import { CreateContactDto, UpdateContactDto, QueryContactDto, UploadContactsDto } from './dto';
-import { Contact } from './entities/contact.entity';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from "@nestjs/common";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import { FileParserService, ParsedContact } from "./file-parser.service";
+import {
+  CreateContactDto,
+  UpdateContactDto,
+  QueryContactDto,
+  UploadContactsDto,
+} from "./dto";
+import { Contact } from "./entities/contact.entity";
 
 @Injectable()
 export class ContactsService {
@@ -21,7 +31,7 @@ export class ContactsService {
       });
 
       if (existingContact) {
-        throw new BadRequestException('이미 등록된 전화번호입니다.');
+        throw new BadRequestException("이미 등록된 전화번호입니다.");
       }
 
       const contact = await this.prisma.contact.create({
@@ -33,17 +43,24 @@ export class ContactsService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException('연락처 생성에 실패했습니다.');
+      throw new BadRequestException("연락처 생성에 실패했습니다.");
     }
   }
 
   async findAll(queryDto: QueryContactDto) {
-    const { page = 1, limit = 20, search, groupName, isActive, sort = 'createdAt:desc' } = queryDto;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      groupName,
+      isActive,
+      sort = "createdAt:desc",
+    } = queryDto;
     const skip = (page - 1) * limit;
 
     // 정렬 파싱
-    const [sortField, sortOrder] = sort.split(':');
-    const orderBy = { [sortField]: sortOrder || 'desc' };
+    const [sortField, sortOrder] = sort.split(":");
+    const orderBy = { [sortField]: sortOrder || "desc" };
 
     // 검색 조건 구성
     const where: any = {};
@@ -92,7 +109,7 @@ export class ContactsService {
         },
       };
     } catch (error) {
-      throw new BadRequestException('연락처 목록 조회에 실패했습니다.');
+      throw new BadRequestException("연락처 목록 조회에 실패했습니다.");
     }
   }
 
@@ -103,7 +120,7 @@ export class ContactsService {
       });
 
       if (!contact) {
-        throw new NotFoundException('연락처를 찾을 수 없습니다.');
+        throw new NotFoundException("연락처를 찾을 수 없습니다.");
       }
 
       return contact as Contact;
@@ -111,11 +128,14 @@ export class ContactsService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException('연락처 조회에 실패했습니다.');
+      throw new BadRequestException("연락처 조회에 실패했습니다.");
     }
   }
 
-  async update(id: string, updateContactDto: UpdateContactDto): Promise<Contact> {
+  async update(
+    id: string,
+    updateContactDto: UpdateContactDto,
+  ): Promise<Contact> {
     // 연락처 존재 확인
     await this.findOne(id);
 
@@ -129,7 +149,7 @@ export class ContactsService {
       });
 
       if (existingContact) {
-        throw new BadRequestException('이미 등록된 전화번호입니다.');
+        throw new BadRequestException("이미 등록된 전화번호입니다.");
       }
     }
 
@@ -144,7 +164,7 @@ export class ContactsService {
 
       return contact as Contact;
     } catch (error) {
-      throw new BadRequestException('연락처 수정에 실패했습니다.');
+      throw new BadRequestException("연락처 수정에 실패했습니다.");
     }
   }
 
@@ -157,7 +177,7 @@ export class ContactsService {
         where: { id },
       });
     } catch (error) {
-      throw new BadRequestException('연락처 삭제에 실패했습니다.');
+      throw new BadRequestException("연락처 삭제에 실패했습니다.");
     }
   }
 
@@ -233,7 +253,7 @@ export class ContactsService {
         errors: results.errors,
       };
     } catch (error) {
-      this.logger.error('Contact upload failed', error);
+      this.logger.error("Contact upload failed", error);
       throw error;
     }
   }
@@ -241,7 +261,7 @@ export class ContactsService {
   async getGroups() {
     try {
       const groups = await this.prisma.contact.groupBy({
-        by: ['groupName'],
+        by: ["groupName"],
         where: {
           groupName: { not: null },
           isActive: true,
@@ -251,17 +271,17 @@ export class ContactsService {
         },
         orderBy: {
           _count: {
-            id: 'desc',
+            id: "desc",
           },
         },
       });
 
-      return groups.map(group => ({
+      return groups.map((group) => ({
         name: group.groupName,
         count: group._count.id,
       }));
     } catch (error) {
-      throw new BadRequestException('그룹 목록 조회에 실패했습니다.');
+      throw new BadRequestException("그룹 목록 조회에 실패했습니다.");
     }
   }
 
@@ -272,7 +292,7 @@ export class ContactsService {
         this.prisma.contact.count({ where: { isActive: true } }),
         this.prisma.contact.count({ where: { isActive: false } }),
         this.prisma.contact.groupBy({
-          by: ['groupName'],
+          by: ["groupName"],
           where: { groupName: { not: null } },
         }),
       ]);
@@ -284,7 +304,7 @@ export class ContactsService {
         totalGroups: groups.length,
       };
     } catch (error) {
-      throw new BadRequestException('연락처 통계 조회에 실패했습니다.');
+      throw new BadRequestException("연락처 통계 조회에 실패했습니다.");
     }
   }
 
@@ -301,7 +321,7 @@ export class ContactsService {
         message: `${result.count}개의 연락처가 삭제되었습니다.`,
       };
     } catch (error) {
-      throw new BadRequestException('일괄 삭제에 실패했습니다.');
+      throw new BadRequestException("일괄 삭제에 실패했습니다.");
     }
   }
 
@@ -322,7 +342,7 @@ export class ContactsService {
         message: `${result.count}개의 연락처 그룹이 변경되었습니다.`,
       };
     } catch (error) {
-      throw new BadRequestException('일괄 그룹 변경에 실패했습니다.');
+      throw new BadRequestException("일괄 그룹 변경에 실패했습니다.");
     }
   }
 

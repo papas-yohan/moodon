@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { nanoid } from 'nanoid';
+import { Injectable } from "@nestjs/common";
+import { nanoid } from "nanoid";
 
 export interface TrackingCodeData {
   productId: string;
@@ -10,7 +10,6 @@ export interface TrackingCodeData {
 
 @Injectable()
 export class TrackingCodeService {
-  
   generateTrackingCode(data: TrackingCodeData): string {
     // 추적 코드 생성: track_ + nanoid(10) + timestamp의 마지막 6자리
     const shortTimestamp = data.timestamp.toString().slice(-6);
@@ -31,17 +30,20 @@ export class TrackingCodeService {
     };
 
     const trackingCode = this.generateTrackingCode(trackingData);
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
     const trackingUrl = `${baseUrl}/api/v1/tracking/click/${trackingCode}`;
 
     return { trackingCode, trackingUrl };
   }
 
-  parseTrackingCode(trackingCode: string): { isValid: boolean; timestamp?: number } {
+  parseTrackingCode(trackingCode: string): {
+    isValid: boolean;
+    timestamp?: number;
+  } {
     try {
       // track_[randomId]_[timestamp] 형식 검증
-      const parts = trackingCode.split('_');
-      if (parts.length !== 3 || parts[0] !== 'track') {
+      const parts = trackingCode.split("_");
+      if (parts.length !== 3 || parts[0] !== "track") {
         return { isValid: false };
       }
 
@@ -72,40 +74,42 @@ export class TrackingCodeService {
     }
 
     // 기본 상품 페이지 URL (향후 프론트엔드 구현 시 변경)
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
     return `${baseUrl}/products/${productId}`;
   }
 
   // 디바이스 타입 감지
-  detectDevice(userAgent?: string): 'mobile' | 'tablet' | 'desktop' | 'unknown' {
-    if (!userAgent) return 'unknown';
+  detectDevice(
+    userAgent?: string,
+  ): "mobile" | "tablet" | "desktop" | "unknown" {
+    if (!userAgent) return "unknown";
 
     const ua = userAgent.toLowerCase();
-    
+
     if (/mobile|android|iphone|ipod|blackberry|windows phone/i.test(ua)) {
-      return 'mobile';
+      return "mobile";
     } else if (/tablet|ipad/i.test(ua)) {
-      return 'tablet';
+      return "tablet";
     } else if (/desktop|windows|macintosh|linux/i.test(ua)) {
-      return 'desktop';
+      return "desktop";
     }
-    
-    return 'unknown';
+
+    return "unknown";
   }
 
   // 브라우저 감지
   detectBrowser(userAgent?: string): string {
-    if (!userAgent) return 'unknown';
+    if (!userAgent) return "unknown";
 
     const ua = userAgent.toLowerCase();
-    
-    if (ua.includes('chrome')) return 'chrome';
-    if (ua.includes('firefox')) return 'firefox';
-    if (ua.includes('safari')) return 'safari';
-    if (ua.includes('edge')) return 'edge';
-    if (ua.includes('opera')) return 'opera';
-    
-    return 'unknown';
+
+    if (ua.includes("chrome")) return "chrome";
+    if (ua.includes("firefox")) return "firefox";
+    if (ua.includes("safari")) return "safari";
+    if (ua.includes("edge")) return "edge";
+    if (ua.includes("opera")) return "opera";
+
+    return "unknown";
   }
 
   // 메타데이터 생성

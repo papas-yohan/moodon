@@ -1,6 +1,6 @@
-import { Controller, Get, Res, Req } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { AppService } from './app.service';
+import { Controller, Get, Res, Req } from "@nestjs/common";
+import { Request, Response } from "express";
+import { AppService } from "./app.service";
 
 @Controller()
 export class RootController {
@@ -8,9 +8,10 @@ export class RootController {
 
   @Get()
   getRoot(@Req() req: Request, @Res() res: Response) {
-    const userAgent = req.headers['user-agent'] || '';
-    const acceptHeader = req.headers['accept'] || '';
-    const isBrowser = acceptHeader.includes('text/html') || userAgent.includes('Mozilla');
+    const userAgent = req.headers["user-agent"] || "";
+    const acceptHeader = req.headers["accept"] || "";
+    const isBrowser =
+      acceptHeader.includes("text/html") || userAgent.includes("Mozilla");
 
     if (isBrowser) {
       // 브라우저 접근 시 HTML 응답
@@ -116,7 +117,7 @@ export class RootController {
         </div>
         <div class="info-card">
             <div class="info-label">실행 시간</div>
-            <div class="info-value">${new Date(appInfo.timestamp).toLocaleString('ko-KR')}</div>
+            <div class="info-value">${new Date(appInfo.timestamp).toLocaleString("ko-KR")}</div>
         </div>
     </div>
 
@@ -134,7 +135,7 @@ export class RootController {
     </div>
 </body>
 </html>`;
-      res.setHeader('Content-Type', 'text/html');
+      res.setHeader("Content-Type", "text/html");
       res.send(html);
     } else {
       // API 호출 시 JSON 응답
@@ -142,8 +143,8 @@ export class RootController {
     }
   }
 
-  @Get('favicon.ico')
+  @Get("favicon.ico")
   getFavicon(@Res() res: Response) {
-    res.redirect('/favicon.svg');
+    res.redirect("/favicon.svg");
   }
 }

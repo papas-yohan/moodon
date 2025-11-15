@@ -1,9 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ContactsController } from './contacts.controller';
-import { ContactsService } from './contacts.service';
-import { CreateContactDto, UpdateContactDto, QueryContactDto, UploadContactsDto } from './dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ContactsController } from "./contacts.controller";
+import { ContactsService } from "./contacts.service";
+import {
+  CreateContactDto,
+  UpdateContactDto,
+  QueryContactDto,
+  UploadContactsDto,
+} from "./dto";
 
-describe('ContactsController', () => {
+describe("ContactsController", () => {
   let controller: ContactsController;
   let service: ContactsService;
 
@@ -40,17 +45,17 @@ describe('ContactsController', () => {
     jest.clearAllMocks();
   });
 
-  describe('create', () => {
-    it('연락처를 생성하고 결과를 반환해야 함', async () => {
+  describe("create", () => {
+    it("연락처를 생성하고 결과를 반환해야 함", async () => {
       // Arrange
       const createDto: CreateContactDto = {
-        name: '홍길동',
-        phone: '01012345678',
-        kakaoId: 'hong123',
-        groupName: 'VIP고객',
+        name: "홍길동",
+        phone: "01012345678",
+        kakaoId: "hong123",
+        groupName: "VIP고객",
       };
       const expectedResult = {
-        id: 'contact-1',
+        id: "contact-1",
         ...createDto,
         isActive: true,
         createdAt: new Date(),
@@ -68,18 +73,18 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('쿼리 파라미터로 연락처 목록을 조회해야 함', async () => {
+  describe("findAll", () => {
+    it("쿼리 파라미터로 연락처 목록을 조회해야 함", async () => {
       // Arrange
       const queryDto: QueryContactDto = {
         page: 1,
         limit: 10,
-        search: '홍길동',
+        search: "홍길동",
       };
       const expectedResult = {
         data: [
-          { id: '1', name: '홍길동', phone: '01012345678' },
-          { id: '2', name: '홍길순', phone: '01087654321' },
+          { id: "1", name: "홍길동", phone: "01012345678" },
+          { id: "2", name: "홍길순", phone: "01087654321" },
         ],
         meta: {
           total: 2,
@@ -100,8 +105,8 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('getStats', () => {
-    it('연락처 통계를 반환해야 함', async () => {
+  describe("getStats", () => {
+    it("연락처 통계를 반환해야 함", async () => {
       // Arrange
       const expectedStats = {
         total: 100,
@@ -121,13 +126,13 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('getGroups', () => {
-    it('그룹 목록을 반환해야 함', async () => {
+  describe("getGroups", () => {
+    it("그룹 목록을 반환해야 함", async () => {
       // Arrange
       const expectedGroups = [
-        { name: 'VIP고객', count: 50 },
-        { name: '일반고객', count: 30 },
-        { name: '신규고객', count: 20 },
+        { name: "VIP고객", count: 50 },
+        { name: "일반고객", count: 30 },
+        { name: "신규고객", count: 20 },
       ];
 
       mockContactsService.getGroups.mockResolvedValue(expectedGroups);
@@ -141,15 +146,15 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('findOne', () => {
-    it('ID로 연락처를 조회해야 함', async () => {
+  describe("findOne", () => {
+    it("ID로 연락처를 조회해야 함", async () => {
       // Arrange
-      const contactId = 'contact-1';
+      const contactId = "contact-1";
       const expectedResult = {
         id: contactId,
-        name: '홍길동',
-        phone: '01012345678',
-        groupName: 'VIP고객',
+        name: "홍길동",
+        phone: "01012345678",
+        groupName: "VIP고객",
       };
 
       mockContactsService.findOne.mockResolvedValue(expectedResult);
@@ -163,18 +168,18 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('update', () => {
-    it('연락처를 수정하고 결과를 반환해야 함', async () => {
+  describe("update", () => {
+    it("연락처를 수정하고 결과를 반환해야 함", async () => {
       // Arrange
-      const contactId = 'contact-1';
+      const contactId = "contact-1";
       const updateDto: UpdateContactDto = {
-        name: '수정된 이름',
-        groupName: '새그룹',
+        name: "수정된 이름",
+        groupName: "새그룹",
       };
       const expectedResult = {
         id: contactId,
         ...updateDto,
-        phone: '01012345678',
+        phone: "01012345678",
         updatedAt: new Date(),
       };
 
@@ -189,10 +194,10 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('remove', () => {
-    it('연락처를 삭제해야 함', async () => {
+  describe("remove", () => {
+    it("연락처를 삭제해야 함", async () => {
       // Arrange
-      const contactId = 'contact-1';
+      const contactId = "contact-1";
       mockContactsService.remove.mockResolvedValue(undefined);
 
       // Act
@@ -203,17 +208,18 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('uploadContacts', () => {
-    it('연락처 파일을 업로드하고 결과를 반환해야 함', async () => {
+  describe("uploadContacts", () => {
+    it("연락처 파일을 업로드하고 결과를 반환해야 함", async () => {
       // Arrange
       const file = {
-        originalname: 'contacts.xlsx',
-        buffer: Buffer.from('test'),
-        mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        originalname: "contacts.xlsx",
+        buffer: Buffer.from("test"),
+        mimetype:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         size: 1000,
       } as Express.Multer.File;
       const uploadDto: UploadContactsDto = {
-        defaultGroupName: '업로드그룹',
+        defaultGroupName: "업로드그룹",
         overwriteDuplicates: false,
         skipInvalid: true,
       };
@@ -229,8 +235,8 @@ describe('ContactsController', () => {
         errors: [
           {
             row: 5,
-            data: { name: '잘못된데이터', phone: '잘못된번호' },
-            error: '올바르지 않은 전화번호 형식입니다.',
+            data: { name: "잘못된데이터", phone: "잘못된번호" },
+            error: "올바르지 않은 전화번호 형식입니다.",
           },
         ],
       };
@@ -246,13 +252,13 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('bulkDelete', () => {
-    it('연락처를 일괄 삭제해야 함', async () => {
+  describe("bulkDelete", () => {
+    it("연락처를 일괄 삭제해야 함", async () => {
       // Arrange
-      const ids = ['id1', 'id2', 'id3'];
+      const ids = ["id1", "id2", "id3"];
       const expectedResult = {
         deleted: 3,
-        message: '3개의 연락처가 삭제되었습니다.',
+        message: "3개의 연락처가 삭제되었습니다.",
       };
 
       mockContactsService.bulkDelete.mockResolvedValue(expectedResult);
@@ -266,14 +272,14 @@ describe('ContactsController', () => {
     });
   });
 
-  describe('bulkUpdateGroup', () => {
-    it('연락처 그룹을 일괄 변경해야 함', async () => {
+  describe("bulkUpdateGroup", () => {
+    it("연락처 그룹을 일괄 변경해야 함", async () => {
       // Arrange
-      const ids = ['id1', 'id2', 'id3'];
-      const groupName = 'VIP고객';
+      const ids = ["id1", "id2", "id3"];
+      const groupName = "VIP고객";
       const expectedResult = {
         updated: 3,
-        message: '3개의 연락처 그룹이 변경되었습니다.',
+        message: "3개의 연락처 그룹이 변경되었습니다.",
       };
 
       mockContactsService.bulkUpdateGroup.mockResolvedValue(expectedResult);

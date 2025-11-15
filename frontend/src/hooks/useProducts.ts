@@ -174,24 +174,6 @@ export const useProducts = (params?: QueryProductParams) => {
     },
   });
 
-  // 개별 쿼리 함수
-  const getProducts = (params: QueryProductParams) => {
-    return useQuery({
-      queryKey: ['products', params],
-      queryFn: () => productsApi.getProducts(params),
-      staleTime: 5 * 60 * 1000, // 5분
-    });
-  };
-
-  // 상품 상세 조회
-  const getProduct = (id: string) => {
-    return useQuery({
-      queryKey: ['products', id],
-      queryFn: () => productsApi.getProduct(id),
-      enabled: !!id,
-    });
-  };
-
   // 상품 생성
   const createProduct = useMutation({
     mutationFn: productsApi.createProduct,
@@ -249,14 +231,15 @@ export const useProducts = (params?: QueryProductParams) => {
     error: query.error,
     refetch: query.refetch,
     
-    // 개별 함수들
-    getProducts,
-    getProduct,
+    // Mutation 함수들
     createProduct,
     updateProduct,
     deleteProduct,
     uploadImages,
     composeImages,
+    
+    // API 함수들 (직접 호출용)
+    api: productsApi,
   };
 };
 
@@ -283,5 +266,30 @@ export const useToggleProductActive = () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['products', variables.id] });
     },
+  });
+};
+
+// 개별 쿼리 훅들
+export const useProductsList = (params?: QueryProductParams) => {
+  const defaultParams: QueryProductParams = {
+    page: 1,
+    limit: 20,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+    ...params,
+  };
+
+  return useQuery({
+    queryKey: ['products', defaultParams],
+    queryFn: () => productsApi.getProducts(defaultParams),
+    staleTime: 5 * 60 * 1000, // 5분
+  });
+};
+
+export const useProduct = (id: string) => {
+  return useQuery({
+    queryKey: ['products', id],
+    queryFn: () => productsApi.getProduct(id),
+    enabled: !!id,
   });
 };

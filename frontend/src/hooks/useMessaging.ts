@@ -126,55 +126,10 @@ export const useMessaging = () => {
     },
   });
 
-  // 발송 작업 목록 조회
-  const getSendJobs = (params?: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    channel?: string;
-  }) => {
-    return useQuery({
-      queryKey: ['sendJobs', params],
-      queryFn: () => messagingApi.getSendJobs(params),
-      staleTime: 30 * 1000, // 30초
-    });
-  };
-
-  // 발송 작업 상세 조회
-  const getSendJob = (id: string) => {
-    return useQuery({
-      queryKey: ['sendJobs', id],
-      queryFn: () => messagingApi.getSendJob(id),
-      enabled: !!id,
-      refetchInterval: 5000, // 5초마다 자동 새로고침 (진행률 확인용)
-    });
-  };
-
-  // 발송 통계 조회
-  const getStats = () => {
-    return useQuery({
-      queryKey: ['messaging', 'stats'],
-      queryFn: messagingApi.getStats,
-      staleTime: 60 * 1000, // 1분
-    });
-  };
-
-  // 발송 로그 조회
-  const getSendLogs = (sendJobId: string, params?: { page?: number; limit?: number }) => {
-    return useQuery({
-      queryKey: ['sendLogs', sendJobId, params],
-      queryFn: () => messagingApi.getSendLogs(sendJobId, params),
-      enabled: !!sendJobId,
-      staleTime: 30 * 1000, // 30초
-    });
-  };
-
   return {
     createSendJob,
-    getSendJobs,
-    getSendJob,
-    getStats,
-    getSendLogs,
+    // API 함수들을 직접 반환 (개별 훅 사용 권장)
+    api: messagingApi,
   };
 };
 

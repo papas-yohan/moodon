@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ComposerController } from './composer.controller';
-import { ComposerService } from './composer.service';
-import { CreateComposeJobDto } from './dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ComposerController } from "./composer.controller";
+import { ComposerService } from "./composer.service";
+import { CreateComposeJobDto } from "./dto";
 
-describe('ComposerController', () => {
+describe("ComposerController", () => {
   let controller: ComposerController;
   let service: ComposerService;
 
@@ -34,18 +34,18 @@ describe('ComposerController', () => {
     jest.clearAllMocks();
   });
 
-  describe('createComposeJob', () => {
-    it('합성 작업을 생성하고 결과를 반환해야 함', async () => {
+  describe("createComposeJob", () => {
+    it("합성 작업을 생성하고 결과를 반환해야 함", async () => {
       // Arrange
       const createDto: CreateComposeJobDto = {
-        productId: 'product-1',
-        templateType: 'grid',
+        productId: "product-1",
+        templateType: "grid",
       };
       const expectedResult = {
-        id: 'job-1',
-        productId: 'product-1',
-        status: 'PENDING',
-        templateType: 'grid',
+        id: "job-1",
+        productId: "product-1",
+        status: "PENDING",
+        templateType: "grid",
         resultUrl: null,
         errorMessage: null,
         retryCount: 0,
@@ -65,21 +65,21 @@ describe('ComposerController', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('모든 합성 작업 목록을 반환해야 함', async () => {
+  describe("findAll", () => {
+    it("모든 합성 작업 목록을 반환해야 함", async () => {
       // Arrange
       const expectedResult = [
         {
-          id: 'job-1',
-          productId: 'product-1',
-          status: 'COMPLETED',
-          product: { id: 'product-1', name: '상품1' },
+          id: "job-1",
+          productId: "product-1",
+          status: "COMPLETED",
+          product: { id: "product-1", name: "상품1" },
         },
         {
-          id: 'job-2',
-          productId: 'product-2',
-          status: 'PENDING',
-          product: { id: 'product-2', name: '상품2' },
+          id: "job-2",
+          productId: "product-2",
+          status: "PENDING",
+          product: { id: "product-2", name: "상품2" },
         },
       ];
 
@@ -93,15 +93,15 @@ describe('ComposerController', () => {
       expect(service.findAll).toHaveBeenCalledWith(undefined);
     });
 
-    it('특정 상품의 합성 작업 목록을 반환해야 함', async () => {
+    it("특정 상품의 합성 작업 목록을 반환해야 함", async () => {
       // Arrange
-      const productId = 'product-1';
+      const productId = "product-1";
       const expectedResult = [
         {
-          id: 'job-1',
-          productId: 'product-1',
-          status: 'COMPLETED',
-          product: { id: 'product-1', name: '상품1' },
+          id: "job-1",
+          productId: "product-1",
+          status: "COMPLETED",
+          product: { id: "product-1", name: "상품1" },
         },
       ];
 
@@ -116,8 +116,8 @@ describe('ComposerController', () => {
     });
   });
 
-  describe('getJobStats', () => {
-    it('합성 작업 통계를 반환해야 함', async () => {
+  describe("getJobStats", () => {
+    it("합성 작업 통계를 반환해야 함", async () => {
       // Arrange
       const expectedStats = {
         total: 10,
@@ -138,17 +138,17 @@ describe('ComposerController', () => {
     });
   });
 
-  describe('findOne', () => {
-    it('ID로 합성 작업을 조회해야 함', async () => {
+  describe("findOne", () => {
+    it("ID로 합성 작업을 조회해야 함", async () => {
       // Arrange
-      const jobId = 'job-1';
+      const jobId = "job-1";
       const expectedResult = {
         id: jobId,
-        productId: 'product-1',
-        status: 'COMPLETED',
-        templateType: 'grid',
-        resultUrl: 'http://localhost:3000/uploads/composed/result.jpg',
-        product: { id: 'product-1', name: '상품1' },
+        productId: "product-1",
+        status: "COMPLETED",
+        templateType: "grid",
+        resultUrl: "http://localhost:3000/uploads/composed/result.jpg",
+        product: { id: "product-1", name: "상품1" },
       };
 
       mockComposerService.findOne.mockResolvedValue(expectedResult);
@@ -162,14 +162,14 @@ describe('ComposerController', () => {
     });
   });
 
-  describe('retryComposeJob', () => {
-    it('합성 작업을 재시도해야 함', async () => {
+  describe("retryComposeJob", () => {
+    it("합성 작업을 재시도해야 함", async () => {
       // Arrange
-      const jobId = 'job-1';
+      const jobId = "job-1";
       const expectedResult = {
         id: jobId,
-        productId: 'product-1',
-        status: 'PENDING',
+        productId: "product-1",
+        status: "PENDING",
         retryCount: 1,
       };
 
@@ -184,22 +184,24 @@ describe('ComposerController', () => {
     });
   });
 
-  describe('composeProductImages', () => {
-    it('상품 이미지 합성을 시작해야 함', async () => {
+  describe("composeProductImages", () => {
+    it("상품 이미지 합성을 시작해야 함", async () => {
       // Arrange
-      const productId = 'product-1';
-      const templateType = 'highlight';
+      const productId = "product-1";
+      const templateType = "highlight";
       const expectedResult = {
-        id: 'job-1',
+        id: "job-1",
         productId,
-        status: 'PENDING',
+        status: "PENDING",
         templateType,
       };
 
       mockComposerService.createComposeJob.mockResolvedValue(expectedResult);
 
       // Act
-      const result = await controller.composeProductImages(productId, { templateType });
+      const result = await controller.composeProductImages(productId, {
+        templateType,
+      });
 
       // Assert
       expect(result).toEqual(expectedResult);
@@ -209,14 +211,14 @@ describe('ComposerController', () => {
       });
     });
 
-    it('템플릿 타입이 없을 때 기본값(grid)으로 합성해야 함', async () => {
+    it("템플릿 타입이 없을 때 기본값(grid)으로 합성해야 함", async () => {
       // Arrange
-      const productId = 'product-1';
+      const productId = "product-1";
       const expectedResult = {
-        id: 'job-1',
+        id: "job-1",
         productId,
-        status: 'PENDING',
-        templateType: 'grid',
+        status: "PENDING",
+        templateType: "grid",
       };
 
       mockComposerService.createComposeJob.mockResolvedValue(expectedResult);
@@ -228,7 +230,7 @@ describe('ComposerController', () => {
       expect(result).toEqual(expectedResult);
       expect(service.createComposeJob).toHaveBeenCalledWith({
         productId,
-        templateType: 'grid',
+        templateType: "grid",
       });
     });
   });

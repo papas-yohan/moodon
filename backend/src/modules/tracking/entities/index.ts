@@ -1,1 +1,1 @@
-export { TrackingEvent } from './tracking-event.entity';
+export { TrackingEvent } from "./tracking-event.entity";

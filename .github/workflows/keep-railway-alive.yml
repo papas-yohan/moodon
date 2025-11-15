@@ -1,0 +1,32 @@
+name: Keep Railway Backend Alive
+
+on:
+  schedule:
+    # 5분마다 실행 (GitHub Actions 최소 간격)
+    - cron: '*/5 * * * *'
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  ping-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Railway Backend Health Check
+        run: |
+          echo "🏥 Checking Railway backend health..."
+          
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://backend-production-c41fe.up.railway.app/api/v1/health)
+          
+          if [ $response -eq 200 ]; then
+            echo "✅ Backend is alive and healthy (HTTP $response)"
+            exit 0
+          else
+            echo "⚠️ Backend returned HTTP $response"
+            # 실패해도 워크플로우는 성공으로 처리 (일시적 문제일 수 있음)
+            exit 0
+          fi
+      
+      - name: Log timestamp
+        run: |
+          echo "⏰ Health check completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"

@@ -1,12 +1,12 @@
-import { Controller, Get, Res } from '@nestjs/common';
-import { Response } from 'express';
-import { AppService } from './app.service';
+import { Controller, Get, Res } from "@nestjs/common";
+import { Response } from "express";
+import { AppService } from "./app.service";
 
-@Controller('docs')
+@Controller("docs")
 export class DocsController {
   constructor(private readonly appService: AppService) {}
 
-  @Get('simple')
+  @Get("simple")
   getSimpleDocs(@Res() res: Response) {
     const appInfo = this.appService.getAppInfo() as any;
     const html = `
@@ -197,7 +197,7 @@ export class DocsController {
     </div>
 </body>
 </html>`;
-    res.setHeader('Content-Type', 'text/html');
+    res.setHeader("Content-Type", "text/html");
     res.send(html);
   }
 }

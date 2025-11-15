@@ -1,8 +1,8 @@
-import { registerAs } from '@nestjs/config';
+import { registerAs } from "@nestjs/config";
 
-export const databaseConfig = registerAs('database', () => ({
+export const databaseConfig = registerAs("database", () => ({
   url: process.env.DATABASE_URL,
-  
+
   // Connection pool settings
   pool: {
     min: 2,
@@ -16,5 +16,8 @@ export const databaseConfig = registerAs('database', () => ({
   },
 
   // Logging
-  logging: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
+  logging:
+    process.env.NODE_ENV === "development"
+      ? ["query", "info", "warn", "error"]
+      : ["error"],
 }));

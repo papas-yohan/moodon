@@ -1,9 +1,21 @@
-import { Injectable, NotFoundException, BadRequestException, Logger, Inject, forwardRef } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
-import { StorageService } from '../../common/storage/storage.service';
-import { ComposerService } from '../composer/composer.service';
-import { CreateProductDto, UpdateProductDto, QueryProductDto, UploadImageDto } from './dto';
-import { Product } from './entities/product.entity';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+  Inject,
+  forwardRef,
+} from "@nestjs/common";
+import { PrismaService } from "../../common/prisma/prisma.service";
+import { StorageService } from "../../common/storage/storage.service";
+import { ComposerService } from "../composer/composer.service";
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  QueryProductDto,
+  UploadImageDto,
+} from "./dto";
+import { Product } from "./entities/product.entity";
 
 @Injectable()
 export class ProductsService {
@@ -21,36 +33,42 @@ export class ProductsService {
       const product = await this.prisma.product.create({
         data: {
           ...createProductDto,
-          status: 'DRAFT',
+          status: "DRAFT",
         },
         include: {
           images: {
-            orderBy: { sequence: 'asc' },
+            orderBy: { sequence: "asc" },
           },
         },
       });
 
       return product as Product;
     } catch (error) {
-      throw new BadRequestException('상품 생성에 실패했습니다.');
+      throw new BadRequestException("상품 생성에 실패했습니다.");
     }
   }
 
   async findAll(queryDto: QueryProductDto) {
-    const { page = 1, limit = 20, search, status, sort = 'createdAt:desc' } = queryDto;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      status,
+      sort = "createdAt:desc",
+    } = queryDto;
     const skip = (page - 1) * limit;
 
     // 정렬 파싱
-    const [sortField, sortOrder] = sort.split(':');
-    const orderBy = { [sortField]: sortOrder || 'desc' };
+    const [sortField, sortOrder] = sort.split(":");
+    const orderBy = { [sortField]: sortOrder || "desc" };
 
     // 검색 조건 구성
     const where: any = {};
-    
+
     if (search) {
       where.name = {
         contains: search,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
@@ -67,7 +85,7 @@ export class ProductsService {
           orderBy,
           include: {
             images: {
-              orderBy: { sequence: 'asc' },
+              orderBy: { sequence: "asc" },
               take: 1, // 썸네일용으로 첫 번째 이미지만
             },
           },
@@ -85,7 +103,7 @@ export class ProductsService {
         },
       };
     } catch (error) {
-      throw new BadRequestException('상품 목록 조회에 실패했습니다.');
+      throw new BadRequestException("상품 목록 조회에 실패했습니다.");
     }
   }
 
@@ -95,13 +113,13 @@ export class ProductsService {
         where: { id },
         include: {
           images: {
-            orderBy: { sequence: 'asc' },
+            orderBy: { sequence: "asc" },
           },
         },
       });
 
       if (!product) {
-        throw new NotFoundException('상품을 찾을 수 없습니다.');
+        throw new NotFoundException("상품을 찾을 수 없습니다.");
       }
 
       return product as Product;
@@ -109,11 +127,14 @@ export class ProductsService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException('상품 조회에 실패했습니다.');
+      throw new BadRequestException("상품 조회에 실패했습니다.");
     }
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
     // 상품 존재 확인
     await this.findOne(id);
 
@@ -126,14 +147,14 @@ export class ProductsService {
         },
         include: {
           images: {
-            orderBy: { sequence: 'asc' },
+            orderBy: { sequence: "asc" },
           },
         },
       });
 
       return product as Product;
     } catch (error) {
-      throw new BadRequestException('상품 수정에 실패했습니다.');
+      throw new BadRequestException("상품 수정에 실패했습니다.");
     }
   }
 
@@ -146,7 +167,7 @@ export class ProductsService {
         where: { id },
       });
     } catch (error) {
-      throw new BadRequestException('상품 삭제에 실패했습니다.');
+      throw new BadRequestException("상품 삭제에 실패했습니다.");
     }
   }
 
@@ -194,9 +215,9 @@ export class ProductsService {
     try {
       const [total, draft, ready, archived] = await Promise.all([
         this.prisma.product.count(),
-        this.prisma.product.count({ where: { status: 'DRAFT' } }),
-        this.prisma.product.count({ where: { status: 'READY' } }),
-        this.prisma.product.count({ where: { status: 'ARCHIVED' } }),
+        this.prisma.product.count({ where: { status: "DRAFT" } }),
+        this.prisma.product.count({ where: { status: "READY" } }),
+        this.prisma.product.count({ where: { status: "ARCHIVED" } }),
       ]);
 
       return {
@@ -206,7 +227,7 @@ export class ProductsService {
         archived,
       };
     } catch (error) {
-      throw new BadRequestException('상품 통계 조회에 실패했습니다.');
+      throw new BadRequestException("상품 통계 조회에 실패했습니다.");
     }
   }
 
@@ -219,28 +240,35 @@ export class ProductsService {
     // 상품 존재 확인
     await this.findOne(productId);
 
-
-
     // 파일 존재 확인
     if (!file) {
-      throw new BadRequestException('업로드할 파일이 없습니다.');
+      throw new BadRequestException("업로드할 파일이 없습니다.");
     }
 
     // 파일 타입 검증
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     if (!allowedTypes.includes(file.mimetype)) {
-      throw new BadRequestException('지원하지 않는 이미지 형식입니다. (JPEG, PNG, GIF, WebP만 지원)');
+      throw new BadRequestException(
+        "지원하지 않는 이미지 형식입니다. (JPEG, PNG, GIF, WebP만 지원)",
+      );
     }
 
     try {
       // 이미지 업로드
       const uploadResult = await this.storageService.uploadImage(
         file,
-        'products',
+        "products",
         {
-          resize: uploadDto.width && uploadDto.height 
-            ? { width: uploadDto.width, height: uploadDto.height }
-            : undefined,
+          resize:
+            uploadDto.width && uploadDto.height
+              ? { width: uploadDto.width, height: uploadDto.height }
+              : undefined,
           quality: uploadDto.quality,
         },
       );
@@ -250,7 +278,7 @@ export class ProductsService {
       if (!sequence) {
         const lastImage = await this.prisma.productImage.findFirst({
           where: { productId },
-          orderBy: { sequence: 'desc' },
+          orderBy: { sequence: "desc" },
         });
         sequence = (lastImage?.sequence || 0) + 1;
       }
@@ -273,7 +301,7 @@ export class ProductsService {
         createdAt: productImage.createdAt,
       };
     } catch (error) {
-      throw new BadRequestException('이미지 업로드에 실패했습니다.');
+      throw new BadRequestException("이미지 업로드에 실패했습니다.");
     }
   }
 
@@ -285,12 +313,12 @@ export class ProductsService {
     try {
       const images = await this.prisma.productImage.findMany({
         where: { productId },
-        orderBy: { sequence: 'asc' },
+        orderBy: { sequence: "asc" },
       });
 
       return images;
     } catch (error) {
-      throw new BadRequestException('이미지 목록 조회에 실패했습니다.');
+      throw new BadRequestException("이미지 목록 조회에 실패했습니다.");
     }
   }
 
@@ -305,11 +333,11 @@ export class ProductsService {
       });
 
       if (!image) {
-        throw new NotFoundException('이미지를 찾을 수 없습니다.');
+        throw new NotFoundException("이미지를 찾을 수 없습니다.");
       }
 
       // 스토리지에서 이미지 삭제
-      const key = image.imageUrl.split('/').pop(); // URL에서 키 추출
+      const key = image.imageUrl.split("/").pop(); // URL에서 키 추출
       if (key) {
         await this.storageService.deleteImage(`products/${key}`);
       }
@@ -319,12 +347,12 @@ export class ProductsService {
         where: { id: imageId },
       });
 
-      return { message: '이미지가 삭제되었습니다.' };
+      return { message: "이미지가 삭제되었습니다." };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException('이미지 삭제에 실패했습니다.');
+      throw new BadRequestException("이미지 삭제에 실패했습니다.");
     }
   }
 
@@ -344,9 +372,9 @@ export class ProductsService {
         ),
       );
 
-      return { message: '이미지 순서가 변경되었습니다.' };
+      return { message: "이미지 순서가 변경되었습니다." };
     } catch (error) {
-      throw new BadRequestException('이미지 순서 변경에 실패했습니다.');
+      throw new BadRequestException("이미지 순서 변경에 실패했습니다.");
     }
   }
 
@@ -360,34 +388,43 @@ export class ProductsService {
     await this.findOne(productId);
 
     // 파일 타입 검증
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     for (const file of files) {
       if (!allowedTypes.includes(file.mimetype)) {
-        throw new BadRequestException(`지원하지 않는 이미지 형식입니다: ${file.originalname}`);
+        throw new BadRequestException(
+          `지원하지 않는 이미지 형식입니다: ${file.originalname}`,
+        );
       }
     }
 
     try {
       const results = [];
-      
+
       // 시작 시퀀스 결정
       const lastImage = await this.prisma.productImage.findFirst({
         where: { productId },
-        orderBy: { sequence: 'desc' },
+        orderBy: { sequence: "desc" },
       });
-      let startSequence = (lastImage?.sequence || 0) + 1;
+      const startSequence = (lastImage?.sequence || 0) + 1;
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        
+
         // 이미지 업로드
         const uploadResult = await this.storageService.uploadImage(
           file,
-          'products',
+          "products",
           {
-            resize: uploadDto.width && uploadDto.height 
-              ? { width: uploadDto.width, height: uploadDto.height }
-              : undefined,
+            resize:
+              uploadDto.width && uploadDto.height
+                ? { width: uploadDto.width, height: uploadDto.height }
+                : undefined,
             quality: uploadDto.quality,
           },
         );
@@ -417,18 +454,25 @@ export class ProductsService {
       });
 
       if (totalImages >= 2) {
-        this.logger.log(`Triggering auto-compose for product ${productId} with ${totalImages} total images`);
-        this.composerService.createComposeJob({
-          productId,
-          templateType: 'grid',
-        }).catch((error) => {
-          this.logger.error(`Auto-compose failed for product ${productId}`, error);
-        });
+        this.logger.log(
+          `Triggering auto-compose for product ${productId} with ${totalImages} total images`,
+        );
+        this.composerService
+          .createComposeJob({
+            productId,
+            templateType: "grid",
+          })
+          .catch((error) => {
+            this.logger.error(
+              `Auto-compose failed for product ${productId}`,
+              error,
+            );
+          });
       }
 
       return results;
     } catch (error) {
-      throw new BadRequestException('다중 이미지 업로드에 실패했습니다.');
+      throw new BadRequestException("다중 이미지 업로드에 실패했습니다.");
     }
   }
 }
