@@ -6,6 +6,7 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { v2 as cloudinary } from "cloudinary";
 import * as sharp from "sharp";
 import * as path from "path";
 import * as fs from "fs/promises";
@@ -23,6 +24,7 @@ export class StorageService {
   private s3Client: S3Client | null = null;
   private readonly bucketName: string;
   private readonly useS3: boolean;
+  private readonly useCloudinary: boolean;
   private readonly uploadDir: string;
 
   constructor(private configService: ConfigService) {
@@ -32,14 +34,36 @@ export class StorageService {
     this.uploadDir =
       this.configService.get<string>("UPLOAD_DIR") || "./uploads";
 
+    // Cloudinary 설정 확인
+    const cloudName = this.configService.get<string>("CLOUDINARY_CLOUD_NAME");
+    const apiKey = this.configService.get<string>("CLOUDINARY_API_KEY");
+    const apiSecret = this.configService.get<string>("CLOUDINARY_API_SECRET");
+    this.useCloudinary = !!(cloudName && apiKey && apiSecret);
+
     this.logger.log(
-      `Storage configuration: USE_S3 env=${useS3Env}, useS3=${this.useS3}, uploadDir=${this.uploadDir}`,
+      `Storage configuration: USE_S3=${this.useS3}, useCloudinary=${this.useCloudinary}, uploadDir=${this.uploadDir}`,
     );
 
-    if (this.useS3) {
+    if (this.useCloudinary) {
+      this.initializeCloudinary();
+    } else if (this.useS3) {
       this.initializeS3();
     } else {
       this.initializeLocalStorage();
+    }
+  }
+
+  private initializeCloudinary() {
+    try {
+      cloudinary.config({
+        cloud_name: this.configService.get<string>("CLOUDINARY_CLOUD_NAME"),
+        api_key: this.configService.get<string>("CLOUDINARY_API_KEY"),
+        api_secret: this.configService.get<string>("CLOUDINARY_API_SECRET"),
+      });
+      this.logger.log("Cloudinary storage initialized successfully");
+    } catch (error) {
+      this.logger.error("Failed to initialize Cloudinary", error);
+      throw error;
     }
   }
 
@@ -127,13 +151,44 @@ export class StorageService {
       const fileName = this.generateFileName(file.originalname);
       const key = `${folder}/${fileName}`;
 
-      if (this.useS3) {
+      if (this.useCloudinary) {
+        return await this.uploadToCloudinary(processedBuffer, key, mimeType);
+      } else if (this.useS3) {
         return await this.uploadToS3(processedBuffer, key, mimeType);
       } else {
         return await this.uploadToLocal(processedBuffer, key, mimeType);
       }
     } catch (error) {
       this.logger.error("Failed to upload image", error);
+      throw error;
+    }
+  }
+
+  private async uploadToCloudinary(
+    buffer: Buffer,
+    key: string,
+    mimeType: string,
+  ): Promise<UploadResult> {
+    try {
+      // Buffer를 base64로 변환하여 업로드
+      const base64Data = `data:${mimeType};base64,${buffer.toString("base64")}`;
+      
+      const result = await cloudinary.uploader.upload(base64Data, {
+        folder: "moodon",
+        public_id: key.replace(/\//g, "_"), // 슬래시를 언더스코어로 변경
+        resource_type: "auto",
+      });
+
+      this.logger.log(`Uploaded to Cloudinary: ${result.secure_url}`);
+
+      return {
+        url: result.secure_url,
+        key: result.public_id,
+        size: buffer.length,
+        mimeType,
+      };
+    } catch (error) {
+      this.logger.error("Failed to upload to Cloudinary", error);
       throw error;
     }
   }
@@ -194,13 +249,25 @@ export class StorageService {
 
   async deleteImage(key: string): Promise<void> {
     try {
-      if (this.useS3) {
+      if (this.useCloudinary) {
+        await this.deleteFromCloudinary(key);
+      } else if (this.useS3) {
         await this.deleteFromS3(key);
       } else {
         await this.deleteFromLocal(key);
       }
     } catch (error) {
       this.logger.error(`Failed to delete image: ${key}`, error);
+      throw error;
+    }
+  }
+
+  private async deleteFromCloudinary(key: string): Promise<void> {
+    try {
+      await cloudinary.uploader.destroy(key);
+      this.logger.log(`Deleted from Cloudinary: ${key}`);
+    } catch (error) {
+      this.logger.error(`Failed to delete from Cloudinary: ${key}`, error);
       throw error;
     }
   }
