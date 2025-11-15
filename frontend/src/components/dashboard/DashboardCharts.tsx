@@ -155,3 +155,7 @@ export const DashboardCharts: React.FC = () => {
     </div>
   );
 };
+
+
+// Default export for lazy loading
+export default DashboardCharts;

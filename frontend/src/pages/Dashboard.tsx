@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { DashboardOverview } from '../components/dashboard/DashboardOverview';
-import { DashboardCharts } from '../components/dashboard/DashboardCharts';
 import { RecentEvents } from '../components/dashboard/RecentEvents';
 import { BarChart3, TrendingUp } from 'lucide-react';
+
+// 차트 컴포넌트 지연 로딩 (333KB 번들 분리)
+const DashboardCharts = lazy(() => import('../components/dashboard/DashboardCharts'));
 
 export const Dashboard: React.FC = () => {
   return (
@@ -36,10 +38,23 @@ export const Dashboard: React.FC = () => {
             <DashboardOverview />
           </section>
 
-          {/* Charts Section */}
+          {/* Charts Section - 지연 로딩 */}
           <section>
             <h2 className="text-lg font-medium text-gray-900 mb-4">성과 분석</h2>
-            <DashboardCharts />
+            <Suspense fallback={
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div className="animate-pulse">
+                      <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
+                      <div className="h-64 bg-gray-100 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            }>
+              <DashboardCharts />
+            </Suspense>
           </section>
 
           {/* Recent Events */}
