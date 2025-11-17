@@ -98,20 +98,35 @@ export class SharpComposer implements IImageComposer {
 
     for (const image of images) {
       try {
-        let localPath: string;
+        let buffer: Buffer;
 
-        if (image.url.startsWith("http://localhost:3000/uploads/")) {
-          localPath = image.url.replace("http://localhost:3000/", "./");
-        } else if (image.url.startsWith("/uploads/")) {
-          localPath = "." + image.url;
-        } else if (image.url.startsWith("uploads/")) {
-          localPath = "./" + image.url;
-        } else {
-          throw new Error(`Unsupported URL format: ${image.url}`);
+        // HTTP/HTTPS URL (Cloudinary, S3 등)
+        if (image.url.startsWith("http://") || image.url.startsWith("https://")) {
+          this.logger.debug(`Downloading image from URL: ${image.url}`);
+          const axios = await import("axios");
+          const response = await axios.default.get(image.url, {
+            responseType: "arraybuffer",
+          });
+          buffer = Buffer.from(response.data);
+        }
+        // 로컬 파일 경로
+        else {
+          let localPath: string;
+
+          if (image.url.startsWith("http://localhost:3000/uploads/")) {
+            localPath = image.url.replace("http://localhost:3000/", "./");
+          } else if (image.url.startsWith("/uploads/")) {
+            localPath = "." + image.url;
+          } else if (image.url.startsWith("uploads/")) {
+            localPath = "./" + image.url;
+          } else {
+            throw new Error(`Unsupported URL format: ${image.url}`);
+          }
+
+          this.logger.debug(`Reading image from local: ${localPath}`);
+          buffer = await fs.readFile(localPath);
         }
 
-        this.logger.debug(`Reading image from: ${localPath}`);
-        const buffer = await fs.readFile(localPath);
         buffers.push(buffer);
       } catch (error) {
         this.logger.error(`Failed to download image: ${image.url}`, error);
