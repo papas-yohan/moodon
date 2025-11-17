@@ -1,11 +1,11 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x"]
+aptPkgs = ["fonts-noto-cjk"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["npm install && npx prisma generate && npm run build"]
+cmds = ["npm run build"]
 
 [start]
-cmd = "node dist/main.js"
+cmd = "npm run start:prod"
