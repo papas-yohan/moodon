@@ -140,9 +140,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     try {
       setIsUploading(true);
 
+      // marketUrl이 빈 문자열이면 undefined로 변환
       const productData = {
         ...data,
         price: Number(data.price),
+        marketUrl: data.marketUrl && data.marketUrl.trim() !== '' ? data.marketUrl : undefined,
       };
 
       let resultProduct;
@@ -190,23 +192,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           return; // 여기서 종료
         }
 
-        // 편집 모드에서 이미지 변경 시 재합성 트리거
-        if (isEditMode) {
-          console.log('편집 완료 - 이미지 재합성 시작');
-          try {
-            const composeResponse = await fetch(`${API_BASE_URL}/composer/products/${resultProduct.id}/compose?templateType=grid`, {
-              method: 'POST',
-            });
-            
-            if (composeResponse.ok) {
-              console.log('이미지 재합성 작업이 시작되었습니다.');
-            } else {
-              console.warn('이미지 재합성 시작에 실패했습니다.');
-            }
-          } catch (composeError) {
-            console.error('이미지 재합성 오류:', composeError);
-            // 재합성 실패는 전체 프로세스를 중단하지 않음
+        // 이미지 업로드 후 자동 합성 트리거
+        console.log('이미지 업로드 완료 - 자동 합성 시작');
+        try {
+          const composeResponse = await fetch(`${API_BASE_URL}/composer/products/${resultProduct.id}/compose?templateType=grid`, {
+            method: 'POST',
+          });
+          
+          if (composeResponse.ok) {
+            console.log('이미지 합성 작업이 시작되었습니다.');
+          } else {
+            console.warn('이미지 합성 시작에 실패했습니다.');
           }
+        } catch (composeError) {
+          console.error('이미지 합성 오류:', composeError);
+          // 합성 실패는 전체 프로세스를 중단하지 않음
         }
       }
 
