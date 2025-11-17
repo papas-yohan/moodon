@@ -520,22 +520,23 @@ export class SharpComposer implements IImageComposer {
       <svg width="${cardWidth}" height="${cardHeight}">
         <defs>
           <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&amp;display=swap');
             .card-title { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+              font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
               font-size: 36px; 
               font-weight: 700; 
               fill: #212529;
               letter-spacing: -0.5px;
             }
             .card-price { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+              font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
               font-size: 42px; 
               font-weight: 800; 
               fill: #ff6b6b;
               letter-spacing: -1px;
             }
             .card-info { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+              font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
               font-size: 20px; 
               font-weight: 500;
               fill: #6c757d;
@@ -609,8 +610,9 @@ export class SharpComposer implements IImageComposer {
       <svg width="${cardWidth}" height="${cardHeight}">
         <defs>
           <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&amp;display=swap');
             .desc-text { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+              font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
               font-size: 22px; 
               font-weight: 400; 
               fill: #495057;
@@ -717,8 +719,9 @@ export class SharpComposer implements IImageComposer {
       <svg width="${buttonWidth}" height="${buttonHeight}">
         <defs>
           <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&amp;display=swap');
             .button-text { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+              font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
               font-size: 28px; 
               font-weight: 700; 
               fill: white;
