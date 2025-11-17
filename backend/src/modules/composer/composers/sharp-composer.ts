@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as sharp from "sharp";
 import * as fs from "fs/promises";
+import { createCanvas } from "canvas";
 import {
   IImageComposer,
   ImageInput,
@@ -503,19 +504,12 @@ export class SharpComposer implements IImageComposer {
   }
 
   /**
-   * 헤더 카드 생성 (상품 정보)
-   * TODO: 한글 폰트 문제로 임시 비활성화
+   * 헤더 카드 생성 (상품 정보) - Canvas 기반으로 한글 지원
    */
   private async createHeaderCard(
     productInfo: any,
     canvasWidth: number,
   ): Promise<Buffer> {
-    // 텍스트 오버레이 임시 비활성화 (한글 폰트 문제)
-    return Buffer.from(
-      `<svg width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>`,
-    );
-
-    /* 원본 코드 (한글 폰트 문제 해결 후 복원)
     const cardWidth = canvasWidth - 40;
     const cardHeight = 140;
     const priceText = `₩${productInfo.price.toLocaleString()}`;
@@ -523,6 +517,37 @@ export class SharpComposer implements IImageComposer {
       .filter(Boolean)
       .join(" · ");
 
+    // Canvas 생성
+    const canvas = createCanvas(cardWidth, cardHeight);
+    const ctx = canvas.getContext("2d");
+
+    // 배경 (흰색 라운드 박스)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+    this.roundRect(ctx, 0, 0, cardWidth, cardHeight, 20);
+    ctx.fill();
+
+    // 상품명
+    ctx.fillStyle = "#212529";
+    ctx.font = "bold 36px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(productInfo.name, cardWidth / 2, 45);
+
+    // 가격
+    ctx.fillStyle = "#ff6b6b";
+    ctx.font = "800 42px sans-serif";
+    ctx.fillText(priceText, cardWidth / 2, 95);
+
+    // 사이즈/색상
+    if (sizeColorText) {
+      ctx.fillStyle = "#6c757d";
+      ctx.font = "500 20px sans-serif";
+      ctx.fillText(sizeColorText, cardWidth / 2, 125);
+    }
+
+    return canvas.toBuffer("image/png");
+    
+    /* SVG 원본 코드
     const svg = `
       <svg width="${cardWidth}" height="${cardHeight}">
         <defs>
@@ -591,6 +616,30 @@ export class SharpComposer implements IImageComposer {
 
     return Buffer.from(svg);
     */
+  }
+
+  /**
+   * 라운드 사각형 그리기 헬퍼
+   */
+  private roundRect(
+    ctx: any,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+  ) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
   }
 
   /**
