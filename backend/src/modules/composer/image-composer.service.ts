@@ -43,17 +43,31 @@ export class ImageComposerService {
       // 합성 실행
       const result = await composer.compose(images, options);
 
-      // 합성된 이미지 저장
+      // 합성된 이미지를 StorageService를 통해 저장 (Cloudinary 또는 로컬)
       const fileName = `composed-${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
-      const filePath = path.join("./uploads/composed", fileName);
+      
+      // Multer.File 형식으로 변환
+      const file: Express.Multer.File = {
+        buffer: result.buffer,
+        originalname: fileName,
+        mimetype: "image/jpeg",
+        size: result.buffer.length,
+        fieldname: "image",
+        encoding: "7bit",
+        stream: null as any,
+        destination: "",
+        filename: fileName,
+        path: "",
+      };
 
-      // 디렉토리 생성
-      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      // StorageService를 사용하여 업로드 (Cloudinary 우선)
+      const uploadResult = await this.storageService.uploadImage(
+        file,
+        "composed",
+        { quality: 90 },
+      );
 
-      // 파일 저장
-      await fs.writeFile(filePath, result.buffer);
-
-      const resultUrl = `/uploads/composed/${fileName}`;
+      const resultUrl = uploadResult.url;
 
       this.logger.log(
         `Image composition completed: ${resultUrl} (${result.processingTime}s, composer: ${result.composer})`,
@@ -83,12 +97,29 @@ export class ImageComposerService {
       const result = await composer.compose(images, options);
 
       const fileName = `composed-${composerType}-${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
-      const filePath = path.join("./uploads/composed", fileName);
+      
+      // Multer.File 형식으로 변환
+      const file: Express.Multer.File = {
+        buffer: result.buffer,
+        originalname: fileName,
+        mimetype: "image/jpeg",
+        size: result.buffer.length,
+        fieldname: "image",
+        encoding: "7bit",
+        stream: null as any,
+        destination: "",
+        filename: fileName,
+        path: "",
+      };
 
-      await fs.mkdir(path.dirname(filePath), { recursive: true });
-      await fs.writeFile(filePath, result.buffer);
+      // StorageService를 사용하여 업로드 (Cloudinary 우선)
+      const uploadResult = await this.storageService.uploadImage(
+        file,
+        "composed",
+        { quality: 90 },
+      );
 
-      const resultUrl = `/uploads/composed/${fileName}`;
+      const resultUrl = uploadResult.url;
 
       this.logger.log(
         `Image composition completed: ${resultUrl} (${result.processingTime}s)`,
