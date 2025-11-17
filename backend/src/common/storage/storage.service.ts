@@ -152,15 +152,19 @@ export class StorageService {
       const key = `${folder}/${fileName}`;
 
       if (this.useCloudinary) {
+        this.logger.log(`Uploading to Cloudinary: ${key}`);
         return await this.uploadToCloudinary(processedBuffer, key, mimeType);
       } else if (this.useS3) {
+        this.logger.log(`Uploading to S3: ${key}`);
         return await this.uploadToS3(processedBuffer, key, mimeType);
       } else {
+        this.logger.log(`Uploading to local storage: ${key}`);
         return await this.uploadToLocal(processedBuffer, key, mimeType);
       }
     } catch (error) {
-      this.logger.error("Failed to upload image", error);
-      throw error;
+      this.logger.error(`Failed to upload image: ${key}`, error);
+      this.logger.error(`Error details: ${JSON.stringify(error)}`);
+      throw new Error(`이미지 업로드 실패: ${error.message || error}`);
     }
   }
 

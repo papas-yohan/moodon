@@ -472,7 +472,10 @@ export class ProductsService {
 
       return results;
     } catch (error) {
-      throw new BadRequestException("다중 이미지 업로드에 실패했습니다.");
+      this.logger.error("다중 이미지 업로드 실패:", error);
+      throw new BadRequestException(
+        `다중 이미지 업로드에 실패했습니다: ${error.message || error}`,
+      );
     }
   }
 }
