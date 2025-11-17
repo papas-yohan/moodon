@@ -161,10 +161,10 @@ export class StorageService {
         this.logger.log(`Uploading to local storage: ${key}`);
         return await this.uploadToLocal(processedBuffer, key, mimeType);
       }
-    } catch (error) {
-      this.logger.error(`Failed to upload image: ${key}`, error);
-      this.logger.error(`Error details: ${JSON.stringify(error)}`);
-      throw new Error(`이미지 업로드 실패: ${error.message || error}`);
+    } catch (err) {
+      this.logger.error(`Failed to upload image`, err);
+      this.logger.error(`Error details: ${JSON.stringify(err)}`);
+      throw new Error(`이미지 업로드 실패: ${err.message || err}`);
     }
   }
 
