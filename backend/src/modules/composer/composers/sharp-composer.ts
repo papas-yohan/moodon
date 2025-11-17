@@ -504,11 +504,18 @@ export class SharpComposer implements IImageComposer {
 
   /**
    * 헤더 카드 생성 (상품 정보)
+   * TODO: 한글 폰트 문제로 임시 비활성화
    */
   private async createHeaderCard(
     productInfo: any,
     canvasWidth: number,
   ): Promise<Buffer> {
+    // 텍스트 오버레이 임시 비활성화 (한글 폰트 문제)
+    return Buffer.from(
+      `<svg width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>`,
+    );
+
+    /* 원본 코드 (한글 폰트 문제 해결 후 복원)
     const cardWidth = canvasWidth - 40;
     const cardHeight = 140;
     const priceText = `₩${productInfo.price.toLocaleString()}`;
@@ -583,15 +590,23 @@ export class SharpComposer implements IImageComposer {
     `;
 
     return Buffer.from(svg);
+    */
   }
 
   /**
    * 상품 설명 카드 생성
+   * TODO: 한글 폰트 문제로 임시 비활성화
    */
   private async createDescriptionCard(
     description: string,
     canvasWidth: number,
   ): Promise<Buffer> {
+    // 텍스트 오버레이 임시 비활성화 (한글 폰트 문제)
+    return Buffer.from(
+      `<svg width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>`,
+    );
+
+    /* 원본 코드 (한글 폰트 문제 해결 후 복원)
     if (!description || description.trim() === "") {
       // 설명이 없으면 빈 버퍼 반환
       return Buffer.from("");
@@ -653,6 +668,7 @@ export class SharpComposer implements IImageComposer {
     `;
 
     return Buffer.from(svg);
+    */
   }
 
   /**
@@ -710,8 +726,15 @@ export class SharpComposer implements IImageComposer {
 
   /**
    * CTA 버튼 생성
+   * TODO: 한글 폰트 문제로 임시 비활성화
    */
   private async createCTAButton(canvasWidth: number): Promise<Buffer> {
+    // 텍스트 오버레이 임시 비활성화 (한글 폰트 문제)
+    return Buffer.from(
+      `<svg width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>`,
+    );
+
+    /* 원본 코드 (한글 폰트 문제 해결 후 복원)
     const buttonWidth = 600;
     const buttonHeight = 80;
 
@@ -758,6 +781,7 @@ export class SharpComposer implements IImageComposer {
     `;
 
     return Buffer.from(svg);
+    */
   }
 
   /**
