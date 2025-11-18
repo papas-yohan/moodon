@@ -1,7 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as sharp from "sharp";
 import * as fs from "fs/promises";
-import { createCanvas } from "canvas";
+import { createCanvas, registerFont } from "canvas";
+import * as path from "path";
 import {
   IImageComposer,
   ImageInput,
@@ -16,6 +17,41 @@ import {
 @Injectable()
 export class SharpComposer implements IImageComposer {
   private readonly logger = new Logger(SharpComposer.name);
+
+  constructor() {
+    // 한글 폰트 등록 시도
+    this.registerKoreanFonts();
+  }
+
+  /**
+   * 한글 폰트 등록
+   */
+  private registerKoreanFonts() {
+    try {
+      // Railway/Linux 환경의 Noto Sans CJK 폰트 경로들
+      const fontPaths = [
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc',
+      ];
+
+      for (const fontPath of fontPaths) {
+        try {
+          if (require('fs').existsSync(fontPath)) {
+            registerFont(fontPath, { family: 'Noto Sans CJK KR' });
+            this.logger.log(`Korean font registered: ${fontPath}`);
+            return;
+          }
+        } catch (err) {
+          // 다음 경로 시도
+        }
+      }
+
+      this.logger.warn('Korean font not found, text may not render correctly');
+    } catch (error) {
+      this.logger.error('Failed to register Korean font', error);
+    }
+  }
 
   async compose(
     images: ImageInput[],
@@ -528,20 +564,20 @@ export class SharpComposer implements IImageComposer {
 
     // 상품명
     ctx.fillStyle = "#212529";
-    ctx.font = "bold 36px sans-serif";
+    ctx.font = "bold 36px 'Noto Sans CJK KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(productInfo.name, cardWidth / 2, 45);
 
     // 가격
     ctx.fillStyle = "#ff6b6b";
-    ctx.font = "800 42px sans-serif";
+    ctx.font = "800 42px 'Noto Sans CJK KR', sans-serif";
     ctx.fillText(priceText, cardWidth / 2, 95);
 
     // 사이즈/색상
     if (sizeColorText) {
       ctx.fillStyle = "#6c757d";
-      ctx.font = "500 20px sans-serif";
+      ctx.font = "500 20px 'Noto Sans CJK KR', sans-serif";
       ctx.fillText(sizeColorText, cardWidth / 2, 125);
     }
 
