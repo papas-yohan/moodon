@@ -1,5 +1,5 @@
 [phases.setup]
-aptPkgs = ["fonts-noto-cjk"]
+aptPkgs = ["fonts-noto-cjk", "fontconfig", "libcairo2-dev", "libpango1.0-dev", "libjpeg-dev", "libgif-dev", "librsvg2-dev"]
 
 [phases.install]
 cmds = ["npm ci"]
