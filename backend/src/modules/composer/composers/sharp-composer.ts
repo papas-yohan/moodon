@@ -560,7 +560,7 @@ export class SharpComposer implements IImageComposer {
     canvasWidth: number,
   ): Promise<Buffer> {
     const cardWidth = canvasWidth - 40;
-    const cardHeight = 140;
+    const cardHeight = 180; // 140 → 180 (높이 증가)
     const priceText = `₩${productInfo.price.toLocaleString()}`;
     const sizeColorText = [productInfo.size, productInfo.color]
       .filter(Boolean)
@@ -575,23 +575,23 @@ export class SharpComposer implements IImageComposer {
     this.roundRect(ctx, 0, 0, cardWidth, cardHeight, 20);
     ctx.fill();
 
-    // 상품명 (볼드체, 간격 조정)
+    // 상품명 (볼드체, 상단 여백 증가)
     ctx.fillStyle = "#212529";
-    ctx.font = "bold 38px 'Noto Sans KR', sans-serif";
+    ctx.font = "bold 40px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(productInfo.name, cardWidth / 2, 40);
+    ctx.fillText(productInfo.name, cardWidth / 2, 50);
 
-    // 가격 (볼드체, 간격 조정)
+    // 가격 (볼드체, 간격 증가)
     ctx.fillStyle = "#ff6b6b";
-    ctx.font = "bold 44px 'Noto Sans KR', sans-serif";
-    ctx.fillText(priceText, cardWidth / 2, 90);
+    ctx.font = "bold 46px 'Noto Sans KR', sans-serif";
+    ctx.fillText(priceText, cardWidth / 2, 110);
 
-    // 사이즈/색상 (볼드체, 간격 조정)
+    // 사이즈/색상 (볼드체, 하단 여백 증가)
     if (sizeColorText) {
       ctx.fillStyle = "#6c757d";
-      ctx.font = "bold 22px 'Noto Sans KR', sans-serif";
-      ctx.fillText(sizeColorText, cardWidth / 2, 125);
+      ctx.font = "bold 24px 'Noto Sans KR', sans-serif";
+      ctx.fillText(sizeColorText, cardWidth / 2, 155);
     }
 
     return canvas.toBuffer("image/png");

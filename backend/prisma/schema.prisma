@@ -115,7 +115,7 @@ model SendLog {
 
   // Relations
   sendJob        SendJob @relation(fields: [sendJobId], references: [id], onDelete: Cascade)
-  product        Product @relation(fields: [productId], references: [id])
+  product        Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   contact        Contact @relation(fields: [contactId], references: [id])
   trackingEvents TrackingEvent[]
 
@@ -138,7 +138,7 @@ model TrackingEvent {
   createdAt    DateTime  @default(now())
 
   // Relations
-  product Product  @relation(fields: [productId], references: [id])
+  product Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   contact Contact? @relation(fields: [contactId], references: [id])
   sendLog SendLog? @relation(fields: [sendLogId], references: [id])
 
