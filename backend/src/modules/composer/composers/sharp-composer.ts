@@ -195,7 +195,7 @@ export class SharpComposer implements IImageComposer {
     const canvasHeight = 1350;
     const imageSize = 320;
     const padding = 30;
-    const headerHeight = 180;
+    const headerHeight = 220; // 180 → 220 (헤더 카드 높이 증가)
     const cardPadding = 20;
     const ctaButtonHeight = 80;
     const bottomPadding = 30;
@@ -208,9 +208,12 @@ export class SharpComposer implements IImageComposer {
 
     const background = sharp(gradientBackground);
 
+    // 이미지 그리드 시작 위치 (헤더 카드 아래)
+    const imageGridStartY = headerHeight + 20; // 헤더 카드와 이미지 사이 간격
+
     // 이미지 그리드 끝 위치 계산
     const imageRows = Math.ceil(Math.min(imageBuffers.length, 6) / 3);
-    const imageGridEndY = headerHeight + imageRows * (imageSize + padding);
+    const imageGridEndY = imageGridStartY + imageRows * (imageSize + padding);
 
     // 이미지들을 라운드 코너와 그림자 효과로 처리
     const processedImages = await Promise.all(
@@ -225,7 +228,7 @@ export class SharpComposer implements IImageComposer {
         const row = Math.floor(index / 3);
         const col = index % 3;
         const left = padding + col * (imageSize + padding);
-        const top = headerHeight + row * (imageSize + padding);
+        const top = imageGridStartY + row * (imageSize + padding);
 
         return { input: processedImage, left, top };
       }),
@@ -235,12 +238,12 @@ export class SharpComposer implements IImageComposer {
     const headerCard = await this.createHeaderCard(productInfo, canvasWidth);
 
     const compositeElements = [
+      ...processedImages,
       {
         input: headerCard,
         top: 20,
         left: 20,
       },
-      ...processedImages,
     ];
 
     // 하단 요소들의 위치 계산
@@ -560,7 +563,7 @@ export class SharpComposer implements IImageComposer {
     canvasWidth: number,
   ): Promise<Buffer> {
     const cardWidth = canvasWidth - 40;
-    const cardHeight = 180; // 140 → 180 (높이 증가)
+    const cardHeight = 200; // 180 → 200 (높이 더 증가)
     const priceText = `₩${productInfo.price.toLocaleString()}`;
     const sizeColorText = [productInfo.size, productInfo.color]
       .filter(Boolean)
@@ -575,23 +578,23 @@ export class SharpComposer implements IImageComposer {
     this.roundRect(ctx, 0, 0, cardWidth, cardHeight, 20);
     ctx.fill();
 
-    // 상품명 (볼드체, 상단 여백 증가)
+    // 상품명 (볼드체, 상단 여백)
     ctx.fillStyle = "#212529";
     ctx.font = "bold 40px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(productInfo.name, cardWidth / 2, 50);
 
-    // 가격 (볼드체, 간격 증가)
+    // 가격 (볼드체, 중앙)
     ctx.fillStyle = "#ff6b6b";
-    ctx.font = "bold 46px 'Noto Sans KR', sans-serif";
-    ctx.fillText(priceText, cardWidth / 2, 110);
+    ctx.font = "bold 48px 'Noto Sans KR', sans-serif";
+    ctx.fillText(priceText, cardWidth / 2, 115);
 
-    // 사이즈/색상 (볼드체, 하단 여백 증가)
+    // 사이즈/색상 (볼드체, 하단 여백 충분히)
     if (sizeColorText) {
       ctx.fillStyle = "#6c757d";
-      ctx.font = "bold 24px 'Noto Sans KR', sans-serif";
-      ctx.fillText(sizeColorText, cardWidth / 2, 155);
+      ctx.font = "bold 26px 'Noto Sans KR', sans-serif";
+      ctx.fillText(sizeColorText, cardWidth / 2, 170);
     }
 
     return canvas.toBuffer("image/png");
