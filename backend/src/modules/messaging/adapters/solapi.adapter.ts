@@ -40,18 +40,31 @@ export class SolapiAdapter {
    */
   private async initializeSolapi() {
     try {
-      // 데이터베이스에서 API 키 가져오기
-      this.apiKey =
-        await this.settingsService.getActualApiKey("SOLAPI_API_KEY");
-      this.apiSecret =
-        await this.settingsService.getActualApiKey("SOLAPI_API_SECRET");
+      // 환경 변수에서 API 키 가져오기 (우선순위)
+      this.apiKey = this.configService.get<string>("SOLAPI_API_KEY");
+      this.apiSecret = this.configService.get<string>("SOLAPI_API_SECRET");
+
+      // 환경 변수에 없으면 데이터베이스에서 가져오기
+      if (!this.apiKey || !this.apiSecret) {
+        try {
+          this.apiKey =
+            await this.settingsService.getActualApiKey("SOLAPI_API_KEY");
+          this.apiSecret =
+            await this.settingsService.getActualApiKey("SOLAPI_API_SECRET");
+        } catch (error) {
+          this.logger.warn("데이터베이스에서 API 키를 가져올 수 없습니다.");
+        }
+      }
 
       if (!this.apiKey || !this.apiSecret) {
         this.logger.warn(
           "솔라피 API 키가 설정되지 않았습니다. 테스트 모드로 실행됩니다.",
         );
+        this.logger.warn(`API Key exists: ${!!this.apiKey}, API Secret exists: ${!!this.apiSecret}`);
         return;
       }
+
+      this.logger.log(`솔라피 초기화 시작 - API Key: ${this.apiKey.substring(0, 10)}...`);
 
       // Solapi v4 SDK 사용 (기존 호환성 유지)
       const solapi = await import("solapi");
@@ -111,7 +124,7 @@ export class SolapiAdapter {
         };
       }
 
-      const sender =
+      const sender = this.configService.get<string>("SOLAPI_SENDER") ||
         await this.settingsService.getActualApiKey("SOLAPI_SENDER");
 
       // Solapi v4 API 사용
@@ -157,7 +170,7 @@ export class SolapiAdapter {
         };
       }
 
-      const sender =
+      const sender = this.configService.get<string>("SOLAPI_SENDER") ||
         await this.settingsService.getActualApiKey("SOLAPI_SENDER");
 
       const result = await this.messageService.send({
@@ -204,7 +217,7 @@ export class SolapiAdapter {
         };
       }
 
-      const sender =
+      const sender = this.configService.get<string>("SOLAPI_SENDER") ||
         await this.settingsService.getActualApiKey("SOLAPI_SENDER");
 
       // 이미지가 있으면 MMS로, 없으면 LMS로 발송
