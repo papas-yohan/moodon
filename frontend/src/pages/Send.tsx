@@ -415,7 +415,7 @@ ${product.originalPrice ? `(정가: ${product.originalPrice.toLocaleString()}원
                   <h4 className="text-sm font-medium text-gray-700 mb-2">발송 정보</h4>
                   <div className="space-y-1 text-sm text-gray-600">
                     <div>• 연락처: {formData.selectedContacts.length}명</div>
-                    <div>• 채널: {formData.messageType}</div>
+                    <div>• 채널: {formData.messageType === 'SMS' && formData.selectedProducts.some(p => p.composedImageUrl) ? 'MMS (이미지 포함)' : formData.messageType}</div>
                     <div>• 발송 시간: {formData.scheduledAt ? new Date(formData.scheduledAt).toLocaleString('ko-KR') : '즉시 발송'}</div>
                   </div>
                 </div>

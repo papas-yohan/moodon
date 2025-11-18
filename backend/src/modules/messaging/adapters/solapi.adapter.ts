@@ -283,14 +283,32 @@ export class SolapiAdapter {
         fs.writeFileSync(tempFilePath, imageBuffer);
 
         try {
-          // 3단계: 솔라피 SDK로 파일 업로드
-          this.logger.log(`Uploading file to Solapi using SDK`);
-          const solapi = await import("solapi");
+          // 3단계: FormData로 파일 업로드 (Solapi v4 방식)
+          this.logger.log(`Uploading file to Solapi storage API`);
           
-          // 파일 업로드
-          const uploadResult = await solapi.storage.uploadFile(tempFilePath);
-          const fileId = uploadResult.fileId;
+          const FormData = require("form-data");
+          const formData = new FormData();
           
+          // 파일 스트림으로 추가
+          formData.append("file", fs.createReadStream(tempFilePath), {
+            filename: filename,
+            contentType: "image/jpeg",
+          });
+
+          const uploadResponse = await axios.post(
+            `${this.SOLAPI_API_URL}/storage/v1/files`,
+            formData,
+            {
+              headers: {
+                ...this.getAuthHeaders(),
+                ...formData.getHeaders(),
+              },
+              maxContentLength: Infinity,
+              maxBodyLength: Infinity,
+            },
+          );
+
+          const fileId = uploadResponse.data.fileId || uploadResponse.data.id;
           this.logger.log(`File uploaded successfully: ${fileId}`);
 
           // 4단계: MMS 발송
