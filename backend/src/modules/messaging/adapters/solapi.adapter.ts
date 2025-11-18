@@ -211,31 +211,50 @@ export class SolapiAdapter {
       if (payload.imageUrl) {
         this.logger.log(`Sending MMS with image: ${payload.imageUrl}`);
 
-        // 1단계: 이미지 파일 읽기
-        const fs = await import("fs");
-        const path = await import("path");
+        let imageBuffer: Buffer;
+        let filename: string;
 
-        let imagePath = payload.imageUrl;
-        if (imagePath.startsWith("/uploads/")) {
-          imagePath = path.join(process.cwd(), imagePath);
-        } else if (imagePath.startsWith("uploads/")) {
-          imagePath = path.join(process.cwd(), imagePath);
-        }
+        // 1단계: 이미지 다운로드 (Cloudinary URL 또는 로컬 파일)
+        if (payload.imageUrl.startsWith("http://") || payload.imageUrl.startsWith("https://")) {
+          // Cloudinary 또는 외부 URL에서 다운로드
+          this.logger.log(`Downloading image from URL: ${payload.imageUrl}`);
+          try {
+            const response = await axios.get(payload.imageUrl, {
+              responseType: "arraybuffer",
+            });
+            imageBuffer = Buffer.from(response.data);
+            filename = `composed_${Date.now()}.jpg`;
+          } catch (error) {
+            this.logger.error(`Failed to download image from URL: ${error.message}`);
+            this.logger.warn("Image download failed, sending as LMS");
+            return this.sendLMS(payload);
+          }
+        } else {
+          // 로컬 파일 경로
+          const fs = await import("fs");
+          const path = await import("path");
 
-        if (!fs.existsSync(imagePath)) {
-          this.logger.warn(
-            `Image file not found: ${imagePath}, sending as LMS`,
-          );
-          return this.sendLMS(payload);
+          let imagePath = payload.imageUrl;
+          if (imagePath.startsWith("/uploads/")) {
+            imagePath = path.join(process.cwd(), imagePath);
+          } else if (imagePath.startsWith("uploads/")) {
+            imagePath = path.join(process.cwd(), imagePath);
+          }
+
+          if (!fs.existsSync(imagePath)) {
+            this.logger.warn(
+              `Image file not found: ${imagePath}, sending as LMS`,
+            );
+            return this.sendLMS(payload);
+          }
+
+          imageBuffer = fs.readFileSync(imagePath);
+          filename = path.basename(imagePath);
         }
 
         // 2단계: 이미지를 솔라피 스토리지에 업로드
-        this.logger.log(`Uploading image to Solapi storage: ${imagePath}`);
-        const imageBuffer = fs.readFileSync(imagePath);
-        const imageId = await this.uploadImageToSolapi(
-          imageBuffer,
-          path.basename(imagePath),
-        );
+        this.logger.log(`Uploading image to Solapi storage: ${filename}`);
+        const imageId = await this.uploadImageToSolapi(imageBuffer, filename);
 
         if (!imageId) {
           this.logger.warn("Image upload failed, sending as LMS");

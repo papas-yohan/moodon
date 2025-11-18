@@ -394,6 +394,11 @@ export class MessagingService {
         // 합성된 이미지가 있으면 MMS로 발송, 없으면 SMS/LMS
         const composedImageUrl = products[0]?.composedImageUrl;
 
+        this.logger.log(`Product info: ${JSON.stringify({
+          name: products[0]?.name,
+          composedImageUrl: composedImageUrl,
+        })}`);
+
         if (composedImageUrl) {
           // MMS 발송 (이미지 첨부)
           this.logger.log(`Sending MMS with image: ${composedImageUrl}`);
@@ -403,6 +408,7 @@ export class MessagingService {
             imageUrl: composedImageUrl,
           });
         } else {
+          this.logger.warn(`No composed image found for product ${products[0]?.id}, sending as SMS/LMS`);
           // 이미지가 없으면 SMS/LMS로 발송
           const textLength = messageTemplate.sms.length;
 
