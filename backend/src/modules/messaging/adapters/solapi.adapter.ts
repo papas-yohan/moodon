@@ -346,10 +346,14 @@ export class SolapiAdapter {
       const FormData = require("form-data");
       const formData = new FormData();
 
+      // FormData에 파일 추가 - 올바른 형식
       formData.append("file", imageBuffer, {
         filename: filename,
         contentType: "image/jpeg",
+        knownLength: imageBuffer.length,
       });
+
+      this.logger.log(`Uploading to Solapi: ${filename}, size: ${imageBuffer.length} bytes`);
 
       const response = await axios.post(
         `${this.SOLAPI_API_URL}/storage/v1/files`,
@@ -359,14 +363,19 @@ export class SolapiAdapter {
             ...this.getAuthHeaders(),
             ...formData.getHeaders(),
           },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
         },
       );
 
+      this.logger.log(`Solapi upload response: ${JSON.stringify(response.data)}`);
       return response.data.fileId || response.data.id;
     } catch (error) {
       this.logger.error(`Image upload to Solapi failed: ${error.message}`);
       if (error.response) {
-        this.logger.error(`Response: ${JSON.stringify(error.response.data)}`);
+        this.logger.error(`Response status: ${error.response.status}`);
+        this.logger.error(`Response data: ${JSON.stringify(error.response.data)}`);
+        this.logger.error(`Request headers: ${JSON.stringify(error.config?.headers)}`);
       }
       return null;
     }
