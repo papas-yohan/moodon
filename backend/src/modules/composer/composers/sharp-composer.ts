@@ -28,13 +28,17 @@ export class SharpComposer implements IImageComposer {
    */
   private registerKoreanFonts() {
     try {
-      // 프로젝트 내 폰트 파일 경로
-      const projectFontPath = path.join(__dirname, '../../../../assets/fonts/NotoSansKR.ttf');
+      // 프로젝트 루트에서 폰트 파일 경로
+      const projectFontPath = path.join(process.cwd(), 'assets/fonts/NotoSansKR.ttf');
+      
+      this.logger.log(`Trying to load font from: ${projectFontPath}`);
       
       if (require('fs').existsSync(projectFontPath)) {
         registerFont(projectFontPath, { family: 'Noto Sans KR' });
-        this.logger.log(`Korean font registered from project: ${projectFontPath}`);
+        this.logger.log(`✅ Korean font registered successfully: ${projectFontPath}`);
         return;
+      } else {
+        this.logger.warn(`❌ Font file not found at: ${projectFontPath}`);
       }
 
       // 시스템 폰트 경로들 (폴백)
