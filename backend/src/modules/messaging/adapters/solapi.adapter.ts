@@ -271,84 +271,56 @@ export class SolapiAdapter {
           filename = path.basename(imagePath);
         }
 
-        // 2단계: 이미지를 임시 파일로 저장
-        const fs = await import("fs");
-        const path = await import("path");
-        const os = await import("os");
+        // 2단계: REST API로 직접 MMS 발송 (파일 포함)
+        this.logger.log(`Sending MMS using REST API with multipart`);
         
-        const tempDir = os.tmpdir();
-        const tempFilePath = path.join(tempDir, filename);
-        
-        this.logger.log(`Saving image to temp file: ${tempFilePath}`);
-        fs.writeFileSync(tempFilePath, imageBuffer);
-
         try {
-          // 3단계: 파일 업로드 - Authorization 헤더만 사용
-          this.logger.log(`Uploading file to Solapi storage`);
-          
           const FormData = require("form-data");
           const form = new FormData();
           
-          // 파일 스트림으로 추가
-          form.append("file", fs.createReadStream(tempFilePath));
+          // 메시지 데이터를 JSON으로 추가
+          const messageData = {
+            message: {
+              to: payload.to,
+              from: sender,
+              text: payload.text,
+              subject: "신상품 안내",
+              type: "MMS",
+            },
+          };
+          
+          form.append("message", JSON.stringify(messageData));
+          form.append("file", imageBuffer, {
+            filename: filename,
+            contentType: "image/jpeg",
+          });
 
-          this.logger.log(`Uploading file: ${filename}, size: ${imageBuffer.length} bytes`);
+          this.logger.log(`Sending MMS with file: ${filename}, size: ${imageBuffer.length} bytes`);
 
-          const authHeaders = this.getAuthHeaders();
-          const formHeaders = form.getHeaders();
-
-          this.logger.log(`Auth header: ${authHeaders.Authorization.substring(0, 50)}...`);
-          this.logger.log(`Content-Type: ${formHeaders['content-type']}`);
-
-          const uploadResponse = await axios.post(
-            `${this.SOLAPI_API_URL}/storage/v1/files`,
+          const response = await axios.post(
+            `${this.SOLAPI_API_URL}/messages/v4/send`,
             form,
             {
               headers: {
-                Authorization: authHeaders.Authorization,
-                ...formHeaders,
+                ...this.getAuthHeaders(),
+                ...form.getHeaders(),
               },
               maxContentLength: Infinity,
               maxBodyLength: Infinity,
             },
           );
 
-          const fileId = uploadResponse.data.fileId || uploadResponse.data.id;
-          this.logger.log(`File uploaded successfully: ${fileId}`);
-
-          // 4단계: MMS 발송
-          const result = await this.messageService.send({
-            messages: [
-              {
-                to: payload.to,
-                from: sender,
-                text: payload.text,
-                subject: "신상품 안내",
-                type: "MMS",
-                fileId: fileId,
-              },
-            ],
-          });
-
-          const messageId = result.groupId || `msg-${Date.now()}`;
+          const messageId = response.data.groupId || `msg-${Date.now()}`;
           this.logger.log(`MMS sent successfully: ${messageId}`);
-
-          // 임시 파일 삭제
-          fs.unlinkSync(tempFilePath);
 
           return {
             messageId,
             status: "success",
           };
-        } catch (uploadError) {
-          this.logger.error(`MMS send failed: ${uploadError.message}`);
-          if (uploadError.response) {
-            this.logger.error(`Upload error response: ${JSON.stringify(uploadError.response.data)}`);
-          }
-          
-          // 임시 파일 삭제
-          if (fs.existsSync(tempFilePath)) {
-            fs.unlinkSync(tempFilePath);
+        } catch (mmsError) {
+          this.logger.error(`MMS send failed: ${mmsError.message}`);
+          if (mmsError.response) {
+            this.logger.error(`MMS error response: ${JSON.stringify(mmsError.response.data)}`);
           }
           
           // MMS 실패 시 LMS로 대체
