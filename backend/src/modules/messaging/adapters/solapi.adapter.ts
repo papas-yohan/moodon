@@ -283,25 +283,30 @@ export class SolapiAdapter {
         fs.writeFileSync(tempFilePath, imageBuffer);
 
         try {
-          // 3단계: FormData로 파일 업로드 (Solapi v4 방식)
-          this.logger.log(`Uploading file to Solapi storage API`);
+          // 3단계: 파일 업로드 - Authorization 헤더만 사용
+          this.logger.log(`Uploading file to Solapi storage`);
           
           const FormData = require("form-data");
-          const formData = new FormData();
+          const form = new FormData();
           
           // 파일 스트림으로 추가
-          formData.append("file", fs.createReadStream(tempFilePath), {
-            filename: filename,
-            contentType: "image/jpeg",
-          });
+          form.append("file", fs.createReadStream(tempFilePath));
+
+          this.logger.log(`Uploading file: ${filename}, size: ${imageBuffer.length} bytes`);
+
+          const authHeaders = this.getAuthHeaders();
+          const formHeaders = form.getHeaders();
+
+          this.logger.log(`Auth header: ${authHeaders.Authorization.substring(0, 50)}...`);
+          this.logger.log(`Content-Type: ${formHeaders['content-type']}`);
 
           const uploadResponse = await axios.post(
             `${this.SOLAPI_API_URL}/storage/v1/files`,
-            formData,
+            form,
             {
               headers: {
-                ...this.getAuthHeaders(),
-                ...formData.getHeaders(),
+                Authorization: authHeaders.Authorization,
+                ...formHeaders,
               },
               maxContentLength: Infinity,
               maxBodyLength: Infinity,
@@ -336,11 +341,19 @@ export class SolapiAdapter {
             status: "success",
           };
         } catch (uploadError) {
+          this.logger.error(`MMS send failed: ${uploadError.message}`);
+          if (uploadError.response) {
+            this.logger.error(`Upload error response: ${JSON.stringify(uploadError.response.data)}`);
+          }
+          
           // 임시 파일 삭제
           if (fs.existsSync(tempFilePath)) {
             fs.unlinkSync(tempFilePath);
           }
-          throw uploadError;
+          
+          // MMS 실패 시 LMS로 대체
+          this.logger.log("Retrying as LMS...");
+          return await this.sendLMS(payload);
         }
       } else {
         // 이미지가 없으면 LMS로 발송
