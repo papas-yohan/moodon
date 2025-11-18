@@ -271,19 +271,15 @@ export class SolapiAdapter {
           filename = path.basename(imagePath);
         }
 
-        // 2단계: 이미지를 솔라피 스토리지에 업로드
-        this.logger.log(`Uploading image to Solapi storage: ${filename}`);
-        const imageId = await this.uploadImageToSolapi(imageBuffer, filename);
+        // 2단계: 솔라피 SDK를 사용한 MMS 발송
+        this.logger.log(`Sending MMS using Solapi SDK with image buffer`);
 
-        if (!imageId) {
-          this.logger.warn("Image upload failed, sending as LMS");
-          return this.sendLMS(payload);
-        }
+        // 이미지를 base64로 인코딩
+        const base64Image = imageBuffer.toString("base64");
+        const imageDataUrl = `data:image/jpeg;base64,${base64Image}`;
 
-        this.logger.log(`Image uploaded successfully: ${imageId}`);
-
-        // 3단계: MMS 발송
-        const messageData = {
+        // Solapi SDK를 사용한 MMS 발송
+        const result = await this.messageService.send({
           messages: [
             {
               to: payload.to,
@@ -291,18 +287,12 @@ export class SolapiAdapter {
               text: payload.text,
               subject: "신상품 안내",
               type: "MMS",
-              imageId: imageId,
+              imageUrl: imageDataUrl, // base64 이미지 직접 전달
             },
           ],
-        };
+        });
 
-        const response = await axios.post(
-          `${this.SOLAPI_API_URL}/messages/v4/send`,
-          messageData,
-          { headers: this.getAuthHeaders() },
-        );
-
-        const messageId = response.data.groupId || `msg-${Date.now()}`;
+        const messageId = result.groupId || `msg-${Date.now()}`;
         this.logger.log(`MMS sent successfully: ${messageId}`);
 
         return {
@@ -342,40 +332,41 @@ export class SolapiAdapter {
     filename: string,
   ): Promise<string | null> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const FormData = require("form-data");
       const formData = new FormData();
 
-      // FormData에 파일 추가 - 올바른 형식
+      // 솔라피 API 문서에 따른 정확한 파일 업로드 방식
+      // file 필드에 Buffer를 직접 전달하고, filename과 contentType을 명시
       formData.append("file", imageBuffer, {
         filename: filename,
         contentType: "image/jpeg",
-        knownLength: imageBuffer.length,
       });
 
       this.logger.log(`Uploading to Solapi: ${filename}, size: ${imageBuffer.length} bytes`);
 
+      // 솔라피 인증 헤더 생성
+      const authHeaders = this.getAuthHeaders();
+      
       const response = await axios.post(
         `${this.SOLAPI_API_URL}/storage/v1/files`,
         formData,
         {
           headers: {
-            ...this.getAuthHeaders(),
-            ...formData.getHeaders(),
+            ...authHeaders,
+            ...formData.getHeaders(), // Content-Type: multipart/form-data; boundary=...
           },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
         },
       );
 
-      this.logger.log(`Solapi upload response: ${JSON.stringify(response.data)}`);
+      this.logger.log(`Solapi upload success: fileId=${response.data.fileId || response.data.id}`);
       return response.data.fileId || response.data.id;
     } catch (error) {
       this.logger.error(`Image upload to Solapi failed: ${error.message}`);
       if (error.response) {
         this.logger.error(`Response status: ${error.response.status}`);
         this.logger.error(`Response data: ${JSON.stringify(error.response.data)}`);
-        this.logger.error(`Request headers: ${JSON.stringify(error.config?.headers)}`);
       }
       return null;
     }
