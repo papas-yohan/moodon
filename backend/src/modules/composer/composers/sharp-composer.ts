@@ -575,22 +575,22 @@ export class SharpComposer implements IImageComposer {
     this.roundRect(ctx, 0, 0, cardWidth, cardHeight, 20);
     ctx.fill();
 
-    // 상품명
+    // 상품명 (볼드체, 간격 조정)
     ctx.fillStyle = "#212529";
-    ctx.font = "bold 36px 'Noto Sans KR', sans-serif";
+    ctx.font = "bold 38px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(productInfo.name, cardWidth / 2, 45);
+    ctx.fillText(productInfo.name, cardWidth / 2, 40);
 
-    // 가격
+    // 가격 (볼드체, 간격 조정)
     ctx.fillStyle = "#ff6b6b";
-    ctx.font = "800 42px 'Noto Sans KR', sans-serif";
-    ctx.fillText(priceText, cardWidth / 2, 95);
+    ctx.font = "bold 44px 'Noto Sans KR', sans-serif";
+    ctx.fillText(priceText, cardWidth / 2, 90);
 
-    // 사이즈/색상
+    // 사이즈/색상 (볼드체, 간격 조정)
     if (sizeColorText) {
       ctx.fillStyle = "#6c757d";
-      ctx.font = "500 20px 'Noto Sans KR', sans-serif";
+      ctx.font = "bold 22px 'Noto Sans KR', sans-serif";
       ctx.fillText(sizeColorText, cardWidth / 2, 125);
     }
 
@@ -692,33 +692,51 @@ export class SharpComposer implements IImageComposer {
   }
 
   /**
-   * 상품 설명 카드 생성
-   * TODO: 한글 폰트 문제로 임시 비활성화
+   * 상품 설명 카드 생성 - Canvas 기반
    */
   private async createDescriptionCard(
     description: string,
     canvasWidth: number,
   ): Promise<Buffer> {
-    // 텍스트 오버레이 임시 비활성화 (한글 폰트 문제)
-    return Buffer.from(
-      `<svg width="1" height="1"><rect width="1" height="1" fill="transparent"/></svg>`,
-    );
-
-    /* 원본 코드 (한글 폰트 문제 해결 후 복원)
     if (!description || description.trim() === "") {
-      // 설명이 없으면 빈 버퍼 반환
-      return Buffer.from("");
+      // 설명이 없으면 투명한 1x1 이미지 반환
+      const canvas = createCanvas(1, 1);
+      return canvas.toBuffer("image/png");
     }
 
     const cardWidth = canvasWidth - 80;
-    const maxCharsPerLine = 28; // 한 줄에 표시할 최대 글자 수
+    const maxCharsPerLine = 28;
     const lineHeight = 32;
     const padding = 30;
+    const fontSize = 22;
 
     // 텍스트를 줄바꿈 처리
     const lines = this.wrapText(description, maxCharsPerLine);
-    const cardHeight = Math.min(lines.length * lineHeight + padding * 2, 200); // 최대 높이 제한
+    const cardHeight = Math.min(lines.length * lineHeight + padding * 2, 200);
 
+    // Canvas 생성
+    const canvas = createCanvas(cardWidth, cardHeight);
+    const ctx = canvas.getContext("2d");
+
+    // 배경 (흰색 라운드 박스)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    this.roundRect(ctx, 0, 0, cardWidth, cardHeight, 15);
+    ctx.fill();
+
+    // 설명 텍스트 (볼드체)
+    ctx.fillStyle = "#495057";
+    ctx.font = `bold ${fontSize}px 'Noto Sans KR', sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    // 여러 줄 렌더링 (최대 5줄)
+    lines.slice(0, 5).forEach((line, index) => {
+      ctx.fillText(line, cardWidth / 2, padding + index * lineHeight);
+    });
+
+    return canvas.toBuffer("image/png");
+
+    /* SVG 원본 코드
     const svg = `
       <svg width="${cardWidth}" height="${cardHeight}">
         <defs>
