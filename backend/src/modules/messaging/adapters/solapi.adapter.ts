@@ -271,34 +271,59 @@ export class SolapiAdapter {
           filename = path.basename(imagePath);
         }
 
-        // 2단계: 솔라피 SDK를 사용한 MMS 발송
-        this.logger.log(`Sending MMS using Solapi SDK with image buffer`);
+        // 2단계: 이미지를 임시 파일로 저장
+        const fs = await import("fs");
+        const path = await import("path");
+        const os = await import("os");
+        
+        const tempDir = os.tmpdir();
+        const tempFilePath = path.join(tempDir, filename);
+        
+        this.logger.log(`Saving image to temp file: ${tempFilePath}`);
+        fs.writeFileSync(tempFilePath, imageBuffer);
 
-        // 이미지를 base64로 인코딩
-        const base64Image = imageBuffer.toString("base64");
-        const imageDataUrl = `data:image/jpeg;base64,${base64Image}`;
+        try {
+          // 3단계: 솔라피 SDK로 파일 업로드
+          this.logger.log(`Uploading file to Solapi using SDK`);
+          const solapi = await import("solapi");
+          
+          // 파일 업로드
+          const uploadResult = await solapi.storage.uploadFile(tempFilePath);
+          const fileId = uploadResult.fileId;
+          
+          this.logger.log(`File uploaded successfully: ${fileId}`);
 
-        // Solapi SDK를 사용한 MMS 발송
-        const result = await this.messageService.send({
-          messages: [
-            {
-              to: payload.to,
-              from: sender,
-              text: payload.text,
-              subject: "신상품 안내",
-              type: "MMS",
-              imageUrl: imageDataUrl, // base64 이미지 직접 전달
-            },
-          ],
-        });
+          // 4단계: MMS 발송
+          const result = await this.messageService.send({
+            messages: [
+              {
+                to: payload.to,
+                from: sender,
+                text: payload.text,
+                subject: "신상품 안내",
+                type: "MMS",
+                fileId: fileId,
+              },
+            ],
+          });
 
-        const messageId = result.groupId || `msg-${Date.now()}`;
-        this.logger.log(`MMS sent successfully: ${messageId}`);
+          const messageId = result.groupId || `msg-${Date.now()}`;
+          this.logger.log(`MMS sent successfully: ${messageId}`);
 
-        return {
-          messageId,
-          status: "success",
-        };
+          // 임시 파일 삭제
+          fs.unlinkSync(tempFilePath);
+
+          return {
+            messageId,
+            status: "success",
+          };
+        } catch (uploadError) {
+          // 임시 파일 삭제
+          if (fs.existsSync(tempFilePath)) {
+            fs.unlinkSync(tempFilePath);
+          }
+          throw uploadError;
+        }
       } else {
         // 이미지가 없으면 LMS로 발송
         return this.sendLMS(payload);
