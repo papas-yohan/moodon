@@ -28,18 +28,27 @@ export class SharpComposer implements IImageComposer {
    */
   private registerKoreanFonts() {
     try {
-      // Railway/Linux 환경의 Noto Sans CJK 폰트 경로들
-      const fontPaths = [
+      // 프로젝트 내 폰트 파일 경로
+      const projectFontPath = path.join(__dirname, '../../../../assets/fonts/NotoSansKR.ttf');
+      
+      if (require('fs').existsSync(projectFontPath)) {
+        registerFont(projectFontPath, { family: 'Noto Sans KR' });
+        this.logger.log(`Korean font registered from project: ${projectFontPath}`);
+        return;
+      }
+
+      // 시스템 폰트 경로들 (폴백)
+      const systemFontPaths = [
         '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
         '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
         '/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc',
       ];
 
-      for (const fontPath of fontPaths) {
+      for (const fontPath of systemFontPaths) {
         try {
           if (require('fs').existsSync(fontPath)) {
-            registerFont(fontPath, { family: 'Noto Sans CJK KR' });
-            this.logger.log(`Korean font registered: ${fontPath}`);
+            registerFont(fontPath, { family: 'Noto Sans KR' });
+            this.logger.log(`Korean font registered from system: ${fontPath}`);
             return;
           }
         } catch (err) {
@@ -564,20 +573,20 @@ export class SharpComposer implements IImageComposer {
 
     // 상품명
     ctx.fillStyle = "#212529";
-    ctx.font = "bold 36px 'Noto Sans CJK KR', sans-serif";
+    ctx.font = "bold 36px 'Noto Sans KR', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(productInfo.name, cardWidth / 2, 45);
 
     // 가격
     ctx.fillStyle = "#ff6b6b";
-    ctx.font = "800 42px 'Noto Sans CJK KR', sans-serif";
+    ctx.font = "800 42px 'Noto Sans KR', sans-serif";
     ctx.fillText(priceText, cardWidth / 2, 95);
 
     // 사이즈/색상
     if (sizeColorText) {
       ctx.fillStyle = "#6c757d";
-      ctx.font = "500 20px 'Noto Sans CJK KR', sans-serif";
+      ctx.font = "500 20px 'Noto Sans KR', sans-serif";
       ctx.fillText(sizeColorText, cardWidth / 2, 125);
     }
 
