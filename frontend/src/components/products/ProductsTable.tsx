@@ -185,6 +185,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
 
     // 우선순위: composedImageUrl > images[0] > imageUrl
     let thumbnailUrl = '';
+    const isComposed = !!data.composedImageUrl;
     
     if (data.composedImageUrl) {
       thumbnailUrl = data.composedImageUrl;
@@ -237,6 +238,9 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
             setImageError(true);
           }}
         />
+        {isComposed && imageLoaded && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" title="합성 완료" />
+        )}
       </div>
     );
   };

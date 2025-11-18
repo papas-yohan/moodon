@@ -152,35 +152,47 @@ ${product.originalPrice ? `(정가: ${product.originalPrice.toLocaleString()}원
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {productsData?.products?.map((product: any) => (
-                <div
-                  key={product.id}
-                  onClick={() => handleProductSelect(product)}
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                    formData.selectedProducts.find(p => p.id === product.id)
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {product.imageUrl && (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-full h-32 object-cover rounded mb-3"
-                    />
-                  )}
-                  <h3 className="font-medium text-gray-900 mb-1">{product.name}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{product.category}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-blue-600">
-                      ₩{product.price.toLocaleString()}
-                    </span>
-                    {formData.selectedProducts.find(p => p.id === product.id) && (
-                      <CheckCircle className="w-5 h-5 text-blue-600" />
+              {productsData?.products?.map((product: any) => {
+                // 합성 이미지가 있으면 우선 표시, 없으면 원본 이미지 표시
+                const thumbnailUrl = product.composedImageUrl || product.imageUrl;
+                
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => handleProductSelect(product)}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                      formData.selectedProducts.find(p => p.id === product.id)
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    {thumbnailUrl && (
+                      <div className="relative mb-3">
+                        <img
+                          src={thumbnailUrl}
+                          alt={product.name}
+                          className="w-full h-32 object-cover rounded"
+                        />
+                        {product.composedImageUrl && (
+                          <span className="absolute top-2 right-2 px-2 py-1 text-xs bg-green-500 text-white rounded-full">
+                            합성완료
+                          </span>
+                        )}
+                      </div>
                     )}
+                    <h3 className="font-medium text-gray-900 mb-1">{product.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{product.category}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-blue-600">
+                        ₩{product.price.toLocaleString()}
+                      </span>
+                      {formData.selectedProducts.find(p => p.id === product.id) && (
+                        <CheckCircle className="w-5 h-5 text-blue-600" />
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="flex justify-between">
