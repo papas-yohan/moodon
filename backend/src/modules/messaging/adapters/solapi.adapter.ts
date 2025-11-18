@@ -117,12 +117,14 @@ export class SolapiAdapter {
   async sendSMS(payload: MessagePayload): Promise<SendResult> {
     try {
       if (!this.isInitialized || !this.messageService) {
-        this.logger.warn("테스트 모드: SMS 발송 시뮬레이션");
+        this.logger.warn(`테스트 모드: SMS 발송 시뮬레이션 (isInitialized: ${this.isInitialized})`);
         return {
           messageId: `test-${Date.now()}`,
           status: "success",
         };
       }
+
+      this.logger.log(`실제 SMS 발송 시작 - 수신자: ${payload.to}`);
 
       const sender = this.configService.get<string>("SOLAPI_SENDER") ||
         await this.settingsService.getActualApiKey("SOLAPI_SENDER");
@@ -163,12 +165,14 @@ export class SolapiAdapter {
   async sendLMS(payload: MessagePayload): Promise<SendResult> {
     try {
       if (!this.isInitialized || !this.messageService) {
-        this.logger.warn("테스트 모드: LMS 발송 시뮬레이션");
+        this.logger.warn(`테스트 모드: LMS 발송 시뮬레이션 (isInitialized: ${this.isInitialized})`);
         return {
           messageId: `test-${Date.now()}`,
           status: "success",
         };
       }
+
+      this.logger.log(`실제 LMS 발송 시작 - 수신자: ${payload.to}`);
 
       const sender = this.configService.get<string>("SOLAPI_SENDER") ||
         await this.settingsService.getActualApiKey("SOLAPI_SENDER");
@@ -210,12 +214,14 @@ export class SolapiAdapter {
   async sendMMS(payload: MessagePayload): Promise<SendResult> {
     try {
       if (!this.isInitialized || !this.apiKey || !this.apiSecret) {
-        this.logger.warn("테스트 모드: MMS 발송 시뮬레이션");
+        this.logger.warn(`테스트 모드: MMS 발송 시뮬레이션 (isInitialized: ${this.isInitialized}, hasApiKey: ${!!this.apiKey}, hasApiSecret: ${!!this.apiSecret})`);
         return {
           messageId: `test-${Date.now()}`,
           status: "success",
         };
       }
+
+      this.logger.log(`실제 MMS 발송 시작 - 수신자: ${payload.to}`);
 
       const sender = this.configService.get<string>("SOLAPI_SENDER") ||
         await this.settingsService.getActualApiKey("SOLAPI_SENDER");
