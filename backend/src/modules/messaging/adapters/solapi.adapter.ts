@@ -278,24 +278,19 @@ export class SolapiAdapter {
           const FormData = require("form-data");
           const form = new FormData();
           
-          // 메시지 데이터를 JSON으로 추가
-          const messageData = {
-            message: {
-              to: payload.to,
-              from: sender,
-              text: payload.text,
-              subject: "신상품 안내",
-              type: "MMS",
-            },
-          };
-          
-          form.append("message", JSON.stringify(messageData));
+          // 메시지 데이터를 개별 필드로 추가 (솔라피 API 형식)
+          form.append("to", payload.to);
+          form.append("from", sender);
+          form.append("text", payload.text);
+          form.append("subject", "신상품 안내");
+          form.append("type", "MMS");
           form.append("file", imageBuffer, {
             filename: filename,
             contentType: "image/jpeg",
           });
 
           this.logger.log(`Sending MMS with file: ${filename}, size: ${imageBuffer.length} bytes`);
+          this.logger.log(`MMS params: to=${payload.to}, from=${sender}, type=MMS`);
 
           const response = await axios.post(
             `${this.SOLAPI_API_URL}/messages/v4/send`,
