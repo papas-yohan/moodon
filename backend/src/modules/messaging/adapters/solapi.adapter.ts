@@ -276,42 +276,26 @@ export class SolapiAdapter {
           filename = path.basename(imagePath);
         }
 
-        // 2단계: 이미지 다운로드
-        this.logger.log(`Downloading image from: ${payload.imageUrl}`);
-        const response = await axios.get(payload.imageUrl, {
-          responseType: "arraybuffer",
-        });
-        imageBuffer = Buffer.from(response.data);
-        filename = `mms_${Date.now()}.jpg`;
+        // 2단계: 이미지 URL을 메시지에 포함하여 LMS로 발송
+        this.logger.log(`Sending LMS with image URL: ${payload.imageUrl}`);
+        
+        // 메시지에 이미지 URL 추가
+        const messageWithImage = `${payload.text}\n\n📸 상품 이미지 보기:\n${payload.imageUrl}`;
 
-        this.logger.log(`Image downloaded: ${imageBuffer.length} bytes`);
-
-        // 3단계: 솔라피 스토리지에 업로드
-        const fileId = await this.uploadImageToSolapi(imageBuffer, filename);
-
-        if (!fileId) {
-          this.logger.warn("Image upload failed, sending as LMS");
-          return this.sendLMS(payload);
-        }
-
-        this.logger.log(`Image uploaded successfully: ${fileId}`);
-
-        // 4단계: MMS 발송 (공식 문서 형식)
         const result = await this.messageService.send({
           messages: [
             {
               to: payload.to,
               from: sender,
-              text: payload.text,
+              text: messageWithImage,
               subject: "신상품 안내",
-              type: "MMS",
-              imageId: fileId, // 업로드된 파일 ID 사용
+              type: "LMS",
             },
           ],
         });
 
         const messageId = result.groupId || `msg-${Date.now()}`;
-        this.logger.log(`MMS sent successfully: ${messageId}`);
+        this.logger.log(`LMS with image URL sent successfully: ${messageId}`);
 
         return {
           messageId,
