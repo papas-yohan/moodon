@@ -3,7 +3,7 @@ import { MessagingService } from "./messaging.service";
 import { MessagingController } from "./messaging.controller";
 import { MessageTemplateService } from "./message-template.service";
 import { SendJobMonitorService } from "./send-job-monitor.service";
-import { SolapiAdapter } from "./adapters/solapi.adapter";
+import { AligoAdapter } from "./adapters/aligo.adapter";
 import { PrismaModule } from "../../common/prisma/prisma.module";
 import { TrackingModule } from "../tracking/tracking.module";
 import { SettingsModule } from "../settings/settings.module";
@@ -15,7 +15,7 @@ import { SettingsModule } from "../settings/settings.module";
     MessagingService,
     MessageTemplateService,
     SendJobMonitorService,
-    SolapiAdapter,
+    AligoAdapter,
   ],
   exports: [MessagingService, MessageTemplateService, SendJobMonitorService],
 })

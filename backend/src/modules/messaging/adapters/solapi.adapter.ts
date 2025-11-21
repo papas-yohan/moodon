@@ -271,47 +271,38 @@ export class SolapiAdapter {
           filename = path.basename(imagePath);
         }
 
-        // 2단계: 이미지를 base64로 인코딩하여 SDK로 발송
-        this.logger.log(`Encoding image to base64 for SDK`);
+        // 2단계: MMS는 복잡하므로 LMS로 발송하고 이미지 URL 포함
+        this.logger.log(`Sending as LMS with image URL (MMS alternative)`);
         
         try {
-          // 이미지를 base64로 인코딩
-          const base64Image = imageBuffer.toString('base64');
-          const imageDataUri = `data:image/jpeg;base64,${base64Image}`;
+          // 이미지 URL을 메시지에 포함
+          const messageWithImage = `${payload.text}\n\n📸 상품 이미지 보기:\n${payload.imageUrl}`;
           
-          this.logger.log(`Image encoded, size: ${imageBuffer.length} bytes, base64 length: ${base64Image.length}`);
+          this.logger.log(`Sending LMS with image URL, message length: ${messageWithImage.length}`);
 
-          // SDK를 사용하여 MMS 발송 (이미지 포함)
+          // LMS로 발송
           const result = await this.messageService.send({
             messages: [
               {
                 to: payload.to,
                 from: sender,
-                text: payload.text,
+                text: messageWithImage,
                 subject: "신상품 안내",
-                type: "MMS",
-                // 이미지를 data URI로 전달
-                imageUrl: imageDataUri,
+                type: "LMS",
               },
             ],
           });
 
           const messageId = result.groupId || `msg-${Date.now()}`;
-          this.logger.log(`MMS sent successfully via SDK: ${messageId}`);
+          this.logger.log(`LMS with image URL sent successfully: ${messageId}`);
 
           return {
             messageId,
             status: "success",
           };
-        } catch (mmsError) {
-          this.logger.error(`MMS send failed: ${mmsError.message}`);
-          if (mmsError.response) {
-            this.logger.error(`MMS error response: ${JSON.stringify(mmsError.response.data)}`);
-          }
-          
-          // MMS 실패 시 LMS로 대체
-          this.logger.log("Retrying as LMS...");
-          return await this.sendLMS(payload);
+        } catch (error) {
+          this.logger.error(`LMS send failed: ${error.message}`);
+          throw error;
         }
       } else {
         // 이미지가 없으면 LMS로 발송

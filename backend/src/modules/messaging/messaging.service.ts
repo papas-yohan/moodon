@@ -10,7 +10,7 @@ import {
   ProductInfo,
   ContactInfo,
 } from "./message-template.service";
-import { SolapiAdapter } from "./adapters/solapi.adapter";
+import { AligoAdapter } from "./adapters/aligo.adapter";
 import { CreateSendJobDto, QuerySendJobDto } from "./dto";
 import { SendJob, SendLog } from "./entities";
 
@@ -21,7 +21,7 @@ export class MessagingService {
   constructor(
     private prisma: PrismaService,
     private messageTemplate: MessageTemplateService,
-    private solapiAdapter: SolapiAdapter,
+    private aligoAdapter: AligoAdapter,
   ) {}
 
   async createSendJob(createDto: CreateSendJobDto): Promise<SendJob> {
@@ -387,7 +387,7 @@ export class MessagingService {
         customMessage,
       );
 
-      // 실제 솔라피 API 호출
+      // 알리고 API 호출
       let result;
 
       if (channel === "SMS") {
@@ -400,9 +400,9 @@ export class MessagingService {
         })}`);
 
         if (composedImageUrl) {
-          // MMS 발송 (이미지 첨부)
+          // MMS 발송 (이미지 URL 포함)
           this.logger.log(`Sending MMS with image: ${composedImageUrl}`);
-          result = await this.solapiAdapter.sendMMS({
+          result = await this.aligoAdapter.sendMMS({
             to: contact.phone,
             text: messageTemplate.sms,
             imageUrl: composedImageUrl,
@@ -414,28 +414,24 @@ export class MessagingService {
 
           if (textLength <= 90) {
             // 단문 SMS
-            result = await this.solapiAdapter.sendSMS({
+            result = await this.aligoAdapter.sendSMS({
               to: contact.phone,
               text: messageTemplate.sms,
             });
           } else {
             // 장문 LMS
-            result = await this.solapiAdapter.sendLMS({
+            result = await this.aligoAdapter.sendLMS({
               to: contact.phone,
               text: messageTemplate.sms,
             });
           }
         }
       } else if (channel === "KAKAO") {
-        // 카카오톡 발송 (알림톡 또는 친구톡)
-        result = await this.solapiAdapter.sendKakaoAlimtalk({
+        // 카카오톡은 알리고에서 지원하지 않으므로 LMS로 대체
+        this.logger.warn("카카오톡은 알리고에서 지원하지 않습니다. LMS로 대체 발송");
+        result = await this.aligoAdapter.sendLMS({
           to: contact.phone,
-          text: messageTemplate.kakao.message,
-          trackingUrl:
-            messageTemplate.kakao.buttonUrl ||
-            products[0]?.marketLink ||
-            undefined,
-          templateCode: messageTemplate.kakao.templateCode,
+          text: messageTemplate.sms,
         });
       } else {
         throw new Error(`Unsupported channel: ${channel}`);
