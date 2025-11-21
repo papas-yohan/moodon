@@ -87,7 +87,7 @@ export class SolapiAdapter {
   /**
    * 솔라피 REST API 인증 헤더 생성
    */
-  private getAuthHeaders(): Record<string, string> {
+  private getAuthHeaders(includeContentType: boolean = true): Record<string, string> {
     const date = new Date().toISOString();
     const salt = crypto.randomBytes(16).toString("hex");
     const signature = crypto
@@ -95,10 +95,15 @@ export class SolapiAdapter {
       .update(date + salt)
       .digest("hex");
 
-    return {
+    const headers: Record<string, string> = {
       Authorization: `HMAC-SHA256 apiKey=${this.apiKey}, date=${date}, salt=${salt}, signature=${signature}`,
-      "Content-Type": "application/json",
     };
+
+    if (includeContentType) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    return headers;
   }
 
   /**
@@ -361,8 +366,8 @@ export class SolapiAdapter {
         form,
         {
           headers: {
-            ...this.getAuthHeaders(),
-            ...form.getHeaders(),
+            ...this.getAuthHeaders(false), // Content-Type 제외
+            ...form.getHeaders(), // multipart/form-data 사용
           },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
