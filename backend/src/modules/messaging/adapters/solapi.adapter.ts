@@ -271,46 +271,33 @@ export class SolapiAdapter {
           filename = path.basename(imagePath);
         }
 
-        // 2단계: REST API로 직접 MMS 발송 (파일 포함)
-        this.logger.log(`Sending MMS using REST API with multipart`);
+        // 2단계: 이미지를 base64로 인코딩하여 SDK로 발송
+        this.logger.log(`Encoding image to base64 for SDK`);
         
         try {
-          const FormData = require("form-data");
-          const form = new FormData();
+          // 이미지를 base64로 인코딩
+          const base64Image = imageBuffer.toString('base64');
+          const imageDataUri = `data:image/jpeg;base64,${base64Image}`;
           
-          // 솔라피 v4 API 형식: messages 배열로 전송
-          const messages = [{
-            to: payload.to,
-            from: sender,
-            text: payload.text,
-            subject: "신상품 안내",
-            type: "MMS",
-          }];
-          
-          form.append("messages", JSON.stringify(messages));
-          form.append("files", imageBuffer, {
-            filename: filename,
-            contentType: "image/jpeg",
+          this.logger.log(`Image encoded, size: ${imageBuffer.length} bytes, base64 length: ${base64Image.length}`);
+
+          // SDK를 사용하여 MMS 발송 (이미지 포함)
+          const result = await this.messageService.send({
+            messages: [
+              {
+                to: payload.to,
+                from: sender,
+                text: payload.text,
+                subject: "신상품 안내",
+                type: "MMS",
+                // 이미지를 data URI로 전달
+                imageUrl: imageDataUri,
+              },
+            ],
           });
 
-          this.logger.log(`Sending MMS with file: ${filename}, size: ${imageBuffer.length} bytes`);
-          this.logger.log(`MMS messages: ${JSON.stringify(messages)}`);
-
-          const response = await axios.post(
-            `${this.SOLAPI_API_URL}/messages/v4/send`,
-            form,
-            {
-              headers: {
-                ...this.getAuthHeaders(),
-                ...form.getHeaders(),
-              },
-              maxContentLength: Infinity,
-              maxBodyLength: Infinity,
-            },
-          );
-
-          const messageId = response.data.groupId || `msg-${Date.now()}`;
-          this.logger.log(`MMS sent successfully: ${messageId}`);
+          const messageId = result.groupId || `msg-${Date.now()}`;
+          this.logger.log(`MMS sent successfully via SDK: ${messageId}`);
 
           return {
             messageId,
