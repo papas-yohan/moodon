@@ -271,39 +271,47 @@ export class SolapiAdapter {
           filename = path.basename(imagePath);
         }
 
-        // 2단계: MMS는 복잡하므로 LMS로 발송하고 이미지 URL 포함
-        this.logger.log(`Sending as LMS with image URL (MMS alternative)`);
-        
-        try {
-          // 이미지 URL을 메시지에 포함
-          const messageWithImage = `${payload.text}\n\n📸 상품 이미지 보기:\n${payload.imageUrl}`;
-          
-          this.logger.log(`Sending LMS with image URL, message length: ${messageWithImage.length}`);
+        // 2단계: 이미지 다운로드
+        this.logger.log(`Downloading image from: ${payload.imageUrl}`);
+        const response = await axios.get(payload.imageUrl, {
+          responseType: "arraybuffer",
+        });
+        imageBuffer = Buffer.from(response.data);
+        filename = `mms_${Date.now()}.jpg`;
 
-          // LMS로 발송
-          const result = await this.messageService.send({
-            messages: [
-              {
-                to: payload.to,
-                from: sender,
-                text: messageWithImage,
-                subject: "신상품 안내",
-                type: "LMS",
-              },
-            ],
-          });
+        this.logger.log(`Image downloaded: ${imageBuffer.length} bytes`);
 
-          const messageId = result.groupId || `msg-${Date.now()}`;
-          this.logger.log(`LMS with image URL sent successfully: ${messageId}`);
+        // 3단계: 솔라피 스토리지에 업로드
+        const fileId = await this.uploadImageToSolapi(imageBuffer, filename);
 
-          return {
-            messageId,
-            status: "success",
-          };
-        } catch (error) {
-          this.logger.error(`LMS send failed: ${error.message}`);
-          throw error;
+        if (!fileId) {
+          this.logger.warn("Image upload failed, sending as LMS");
+          return this.sendLMS(payload);
         }
+
+        this.logger.log(`Image uploaded successfully: ${fileId}`);
+
+        // 4단계: MMS 발송 (공식 문서 형식)
+        const result = await this.messageService.send({
+          messages: [
+            {
+              to: payload.to,
+              from: sender,
+              text: payload.text,
+              subject: "신상품 안내",
+              type: "MMS",
+              imageId: fileId, // 업로드된 파일 ID 사용
+            },
+          ],
+        });
+
+        const messageId = result.groupId || `msg-${Date.now()}`;
+        this.logger.log(`MMS sent successfully: ${messageId}`);
+
+        return {
+          messageId,
+          status: "success",
+        };
       } else {
         // 이미지가 없으면 LMS로 발송
         return this.sendLMS(payload);
@@ -330,7 +338,7 @@ export class SolapiAdapter {
   }
 
   /**
-   * 이미지를 솔라피 스토리지에 업로드
+   * 이미지를 솔라피 스토리지에 업로드 (공식 문서 기준)
    */
   private async uploadImageToSolapi(
     imageBuffer: Buffer,
@@ -338,35 +346,32 @@ export class SolapiAdapter {
   ): Promise<string | null> {
     try {
       const FormData = require("form-data");
-      const formData = new FormData();
+      const form = new FormData();
 
-      // 솔라피 API 문서에 따른 정확한 파일 업로드 방식
-      // file 필드에 Buffer를 직접 전달하고, filename과 contentType을 명시
-      formData.append("file", imageBuffer, {
+      // 공식 문서: file 필드에 바이너리 데이터 전송
+      form.append("file", imageBuffer, {
         filename: filename,
         contentType: "image/jpeg",
       });
 
       this.logger.log(`Uploading to Solapi: ${filename}, size: ${imageBuffer.length} bytes`);
 
-      // 솔라피 인증 헤더 생성
-      const authHeaders = this.getAuthHeaders();
-      
       const response = await axios.post(
         `${this.SOLAPI_API_URL}/storage/v1/files`,
-        formData,
+        form,
         {
           headers: {
-            ...authHeaders,
-            ...formData.getHeaders(), // Content-Type: multipart/form-data; boundary=...
+            ...this.getAuthHeaders(),
+            ...form.getHeaders(),
           },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
         },
       );
 
-      this.logger.log(`Solapi upload success: fileId=${response.data.fileId || response.data.id}`);
-      return response.data.fileId || response.data.id;
+      const fileId = response.data.fileId;
+      this.logger.log(`Solapi upload success: fileId=${fileId}`);
+      return fileId;
     } catch (error) {
       this.logger.error(`Image upload to Solapi failed: ${error.message}`);
       if (error.response) {
